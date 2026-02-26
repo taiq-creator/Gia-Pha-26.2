@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-brown-50: #fdf8f6;
+  --color-brown-100: #f2e8e5;
+  --color-brown-200: #eaddd7;
+  --color-brown-300: #e0cec7;
+  --color-brown-400: #d2bab0;
+  --color-brown-500: #a18072;
+  --color-brown-600: #8a6859;
+  --color-brown-700: #694c40;
+  --color-brown-800: #543d33;
+  --color-brown-900: #423028;
+}
+
+body {
+  background-color: var(--color-brown-50);
+  color: var(--color-brown-900);
+}
+
+/* Family Tree CSS */
+.family-tree ul {
+  padding-top: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.family-tree li {
+  text-align: center;
+  list-style-type: none;
+  position: relative;
+  padding: 10px 4px 0 4px;
+}
+
+.family-tree li::before, .family-tree li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  border-top: 1px solid var(--color-brown-400);
+  width: 50%;
+  height: 10px;
+}
+
+.family-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 1px solid var(--color-brown-400);
+}
+
+.family-tree li:only-child::after, .family-tree li:only-child::before {
+  display: none;
+}
+
+.family-tree li:only-child {
+  padding-top: 0;
+}
+
+.family-tree li:first-child::before, .family-tree li:last-child::after {
+  border: 0 none;
+}
+
+.family-tree li:last-child::before {
+  border-right: 1px solid var(--color-brown-400);
+  border-radius: 0 3px 0 0;
+}
+
+.family-tree li:first-child::after {
+  border-radius: 3px 0 0 0;
+}
+
+.family-tree ul ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  border-left: 1px solid var(--color-brown-400);
+  width: 0;
+  height: 10px;
+  transform: translateX(-50%);
+}
