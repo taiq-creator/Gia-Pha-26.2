@@ -299,17 +299,19 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
 
         {/* FORM TẠO/SỬA */}
         {isFormOpen && (
-          <div className="absolute inset-0 bg-white rounded-xl flex flex-col z-20">
-            <div className="bg-[#b48a28] px-4 py-2.5 flex justify-between items-center flex-shrink-0 rounded-t-xl">
+          <div className="fixed inset-0 z-[55] flex items-center justify-center p-3 sm:p-6">
+            <div className="fixed inset-0 bg-black/40" onClick={() => setIsFormOpen(false)}></div>
+            <div className="relative z-10 bg-white rounded-xl shadow-2xl w-full max-w-lg">
+            <div className="bg-[#b48a28] px-4 py-2.5 flex justify-between items-center rounded-t-xl">
               <h3 className="text-white font-black text-sm">
                 {editingEvent ? '✏️ Chỉnh sửa' : '➕ Tạo mới'}
               </h3>
-              <button onClick={() => setIsFormOpen(false)} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center">
+              <button type="button" onClick={() => setIsFormOpen(false)} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center">
                 <X className="h-3.5 w-3.5 text-white" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-3 overflow-y-auto flex-1">
+            <form onSubmit={handleSave} className="p-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                 {/* Tên - full width */}
@@ -406,6 +408,7 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
                 </button>
               </div>
             </form>
+            </div>
           </div>
         )}
       </div>
