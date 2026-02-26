@@ -372,23 +372,6 @@ export default function App() {
     setExpandedListMembers(prev => ({ ...prev, [memberId]: !prev[memberId] }));
   };
 
-  const handleMoveOrder = (memberId: string, direction: 'up' | 'down', e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Lấy danh sách tất cả member trong đời hiện tại (theo thứ tự trong mảng members gốc)
-    const genMembers = members.filter(m => m.generation === selectedGen);
-    const idx = genMembers.findIndex(m => m.id === memberId);
-    if (direction === 'up' && idx === 0) return;
-    if (direction === 'down' && idx === genMembers.length - 1) return;
-
-    // Hoán đổi trong mảng members gốc
-    const swapWithId = direction === 'up' ? genMembers[idx - 1].id : genMembers[idx + 1].id;
-    const idxA = members.findIndex(m => m.id === memberId);
-    const idxB = members.findIndex(m => m.id === swapWithId);
-    const newMembers = [...members];
-    [newMembers[idxA], newMembers[idxB]] = [newMembers[idxB], newMembers[idxA]];
-    setMembers(newMembers);
-  };
-
   const getSpousesForMember = (memberId: string) => members.filter(m => (m.relationshipType === 'Vợ của' || m.relationshipType === 'Chồng của') && m.relatedMemberId === memberId);
   const getChildrenForMember = (memberId: string) => members.filter(m => (m.relationshipType === 'Con trai của' || m.relationshipType === 'Con gái của') && m.relatedMemberId === memberId);
 
@@ -440,25 +423,6 @@ export default function App() {
 
         {/* Mobile actions */}
         <div className="flex sm:hidden items-center gap-1.5 flex-shrink-0 ml-auto">
-          {/* Nút di chuyển thứ tự mobile */}
-          {!isSubRow && (
-            <div className="flex gap-0.5">
-              <button
-                onClick={(e) => handleMoveOrder(member.id, 'up', e)}
-                className={`p-1 rounded ${isExpandedRoot ? 'text-white/70' : 'text-gray-400 hover:bg-gray-100'}`}
-                title="Lên"
-              >
-                <ChevronUp className="h-3 w-3" />
-              </button>
-              <button
-                onClick={(e) => handleMoveOrder(member.id, 'down', e)}
-                className={`p-1 rounded ${isExpandedRoot ? 'text-white/70' : 'text-gray-400 hover:bg-gray-100'}`}
-                title="Xuống"
-              >
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            </div>
-          )}
           {hasFamily && (
             <button
               onClick={(e) => toggleListExpand(member.id, e)}
@@ -499,25 +463,6 @@ export default function App() {
 
         {/* Desktop actions */}
         <div className="hidden sm:flex items-center gap-2 ml-3 flex-shrink-0">
-          {/* Nút di chuyển thứ tự - chỉ hiện ở row chính */}
-          {!isSubRow && (
-            <div className="flex flex-col gap-0.5">
-              <button
-                onClick={(e) => handleMoveOrder(member.id, 'up', e)}
-                className={`p-0.5 rounded transition-colors ${isExpandedRoot ? 'text-white/70 hover:text-white hover:bg-white/20' : 'text-gray-300 hover:text-[#b48a28] hover:bg-gray-100'}`}
-                title="Di chuyển lên"
-              >
-                <ChevronUp className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={(e) => handleMoveOrder(member.id, 'down', e)}
-                className={`p-0.5 rounded transition-colors ${isExpandedRoot ? 'text-white/70 hover:text-white hover:bg-white/20' : 'text-gray-300 hover:text-[#b48a28] hover:bg-gray-100'}`}
-                title="Di chuyển xuống"
-              >
-                <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
           {hasFamily && (
             <button
               onClick={(e) => toggleListExpand(member.id, e)}
