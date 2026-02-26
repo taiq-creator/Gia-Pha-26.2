@@ -1,42 +1,42 @@
-interface EventsModalProps {
-  isOpen: boolean
-  onClose: () => void
-  events: {
-    title: string
-    date?: string
-    description?: string
-  }[]
+import React from 'react'
+
+type EventItem = {
+  title: string
+  date?: string
+  description?: string
 }
 
-export default function EventsModal({
-  isOpen,
-  onClose,
-  events
-}: EventsModalProps) {
+type EventsModalProps = {
+  isOpen: boolean
+  onClose: () => void
+  events: EventItem[]
+}
+
+const EventsModal = (props: EventsModalProps) => {
+  const { isOpen, onClose, events } = props
+
   if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white w-full max-w-sm rounded-lg shadow-lg p-4 relative">
         
-        {/* Close button */}
+        {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-lg"
+          className="absolute top-2 right-2 text-gray-500 text-lg"
           aria-label="Close"
         >
           ×
         </button>
 
-        {/* Title */}
         <h2 className="text-base font-semibold mb-3 text-center">
           Sự kiện – Ghi chú
         </h2>
 
-        {/* Content */}
         <div className="space-y-3 max-h-[60vh] overflow-y-auto text-sm">
           {events.length === 0 && (
-            <p className="text-center text-gray-500 text-sm">
+            <p className="text-center text-gray-500">
               Chưa có sự kiện
             </p>
           )}
@@ -65,7 +65,6 @@ export default function EventsModal({
           ))}
         </div>
 
-        {/* Footer */}
         <div className="mt-4 flex justify-center">
           <button
             onClick={onClose}
@@ -78,3 +77,5 @@ export default function EventsModal({
     </div>
   )
 }
+
+export default EventsModal
