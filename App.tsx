@@ -120,6 +120,79 @@ export default function App() {
   const ADMIN_EMAIL = 'taiketnoi@gmail.com';
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
+  // --- ĐỒNG HỒ + LỊCH ÂM THỰC ---
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getLunarDate = (date: Date): string => {
+    // Thuật toán chuyển đổi âm lịch
+    const jd = Math.floor((date.getTime()) / 86400000) + 2440588;
+    const l = jd + 68569;
+    const n = Math.floor(4 * l / 146097);
+    const ll = l - Math.floor((146097 * n + 3) / 4);
+    const i = Math.floor(4000 * (ll + 1) / 1461001);
+    const lll = ll - Math.floor(1461 * i / 4) + 31;
+    const j = Math.floor(80 * lll / 2447);
+    const dd = lll - Math.floor(2447 * j / 80);
+    const lv = Math.floor(j / 11);
+    const mm = j + 2 - 12 * lv;
+    const yy = 100 * (n - 49) + i + lv;
+
+    // Tính ngày âm lịch từ Julian Day
+    const lunarMonthNames = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
+    
+    // Dùng công thức đơn giản hóa
+    const sunLong = getSunLongitude(jd);
+    const k = Math.floor((jd - 2415021.076998695) / 29.530588853);
+    let monthStart = getNewMoonDay(k, 7);
+    if (monthStart > jd) monthStart = getNewMoonDay(k - 1, 7);
+    const lunarDay = jd - monthStart + 1;
+    
+    const lunarMonthRaw = Math.floor(sunLong / 30);
+    const lunarMonth = lunarMonthRaw < 0 ? 0 : lunarMonthRaw > 11 ? 11 : lunarMonthRaw;
+
+    return `${lunarDay} tháng ${lunarMonthNames[mm - 1] || mm}`;
+  };
+
+  function getNewMoonDay(k: number, timeZone: number): number {
+    const T = k / 1236.85;
+    const T2 = T * T; const T3 = T2 * T;
+    let Jd = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+    Jd += 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * Math.PI / 180);
+    const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+    const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+    const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+    const Mrad = M * Math.PI / 180; const Mprad = Mpr * Math.PI / 180; const Frad = F * Math.PI / 180;
+    let C1 = (0.1734 - 0.000393 * T) * Math.sin(Mrad) + 0.0021 * Math.sin(2 * Mrad);
+    C1 -= 0.4068 * Math.sin(Mprad) - 0.0161 * Math.sin(2 * Mprad) - 0.0004 * Math.sin(3 * Mprad);
+    C1 += 0.0104 * Math.sin(2 * Frad) - 0.0051 * Math.sin(Mrad + Mprad) - 0.0074 * Math.sin(Mrad - Mprad);
+    C1 += 0.0004 * Math.sin(2 * Frad + Mrad) - 0.0004 * Math.sin(2 * Frad - Mrad) - 0.0006 * Math.sin(2 * Frad + Mprad);
+    C1 += 0.0010 * Math.sin(2 * Frad - Mprad) + 0.0005 * Math.sin(Mrad + 2 * Mprad);
+    const deltat = (T < -11) ? (0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3) : (-0.000278 + 0.000265 * T + 0.000262 * T2);
+    return Math.floor(Jd + C1 - deltat + 0.5 + timeZone / 24);
+  }
+
+  function getSunLongitude(jdn: number): number {
+    const T = (jdn - 2451545.0) / 36525;
+    const T2 = T * T;
+    let dr = Math.PI / 180;
+    let M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
+    let L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
+    let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
+    DL += (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000290 * Math.sin(dr * 3 * M);
+    let L = L0 + DL;
+    L = L - 360 * Math.floor(L / 360);
+    return Math.floor(L / 30);
+  }
+
+  const lunarStr = getLunarDate(now);
+  const weekDays = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+  const solarStr = `${weekDays[now.getDay()]}, ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+  const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+
   const [familyTrees, setFamilyTrees] = useState<FamilyTree[]>([]);
   const [currentTreeId, setCurrentTreeId] = useState<string>('1');
   const [isLoading, setIsLoading] = useState(true);
@@ -696,6 +769,23 @@ export default function App() {
                   {isDownloading ? 'Đang xuất...' : 'PDF'}
                 </button>
               )}
+
+              {/* Đồng hồ + Lịch dương + Lịch âm */}
+              <div className="hidden sm:flex flex-col items-center justify-center bg-black/20 rounded px-3 py-1 border border-white/10 min-w-[160px]">
+                <div className="flex items-center gap-2 w-full justify-between">
+                  <span className="text-white font-black text-sm tracking-widest tabular-nums">{timeStr}</span>
+                  <span className="text-yellow-300 text-[9px] font-bold uppercase tracking-wide">🕐</span>
+                </div>
+                <div className="w-full border-t border-white/10 my-0.5"></div>
+                <div className="text-white/90 text-[9px] font-semibold w-full">☀️ {solarStr}</div>
+                <div className="text-yellow-200 text-[9px] font-semibold w-full">🌙 Âm: {lunarStr}</div>
+              </div>
+
+              {/* Mobile: chỉ hiện giờ + ngày */}
+              <div className="flex sm:hidden flex-col items-center bg-black/20 rounded px-2 py-0.5 border border-white/10">
+                <span className="text-white font-black text-xs tabular-nums">{timeStr}</span>
+                <span className="text-white/70 text-[8px]">{now.getDate()}/{now.getMonth()+1}/{now.getFullYear()}</span>
+              </div>
 
               <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/50" />
