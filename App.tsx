@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { Search, Plus, User, Trash2, Edit2, MapPin, BookOpen, Users, X, Calendar, Upload, ChevronDown, ChevronRight, List, Network, ZoomIn, ZoomOut, Maximize, ChevronUp, UserPlus, Download, Check, LogOut } from 'lucide-react';
+import { Search, Plus, User, Trash2, Edit2, MapPin, BookOpen, Users, X, Calendar, Upload, ChevronDown, ChevronRight, List, Network, ZoomIn, ZoomOut, Maximize, ChevronUp, UserPlus, Download, Check, LogOut, Bell, PartyPopper } from 'lucide-react';
 import { Member, FamilyTree } from './types';
 import { initialMembers } from './data';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { supabase } from './supabaseClient';
 import AuthPage from './AuthPage';
+import EventsModal, { checkUpcomingEvents, FamilyEvent } from './EventsModal';
 
 interface FamilyNodeData {
   mainMember: Member;
@@ -119,6 +120,44 @@ export default function App() {
 
   const ADMIN_EMAIL = 'taiketnoi@gmail.com';
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
+
+  // --- SỰ KIỆN ---
+  const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
+  const [upcomingPopup, setUpcomingPopup] = useState<FamilyEvent[]>([]);
+  const [popupDismissed, setPopupDismissed] = useState(false);
+
+  // Kiểm tra sự kiện sắp tới khi load xong data
+  useEffect(() => {
+    if (familyTrees.length === 0 || popupDismissed) return;
+    const checkEvents = async () => {
+      const { data } = await supabase.from('giapha_events').select('*');
+      if (!data || data.length === 0) return;
+      const allEvents: FamilyEvent[] = data.map((r: any) => ({
+        id: r.id, treeId: r.tree_id, name: r.name, solarDate: r.solar_date,
+        lunarDay: r.lunar_day, lunarMonth: r.lunar_month, lunarMonthName: '',
+        notifyEnabled: r.notify_enabled, repeat: r.repeat_yearly ? 'yearly' : 'once',
+        note: r.note, createdAt: r.created_at,
+      }));
+      const upcoming = checkUpcomingEvents(allEvents, new Date());
+      if (upcoming.length > 0) {
+        setUpcomingPopup(upcoming);
+        // Xin quyền và gửi browser notification
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            upcoming.forEach(ev => {
+              const solarDate = ev.solarDate ? new Date(ev.solarDate).toLocaleDateString('vi-VN') : '';
+              new Notification(`🔔 Sự kiện sắp tới: ${ev.name}`, {
+                body: `${solarDate}${ev.lunarDay ? ` | Âm: ${ev.lunarDay}/${ev.lunarMonth}` : ''}`,
+                icon: '/favicon.ico',
+              });
+            });
+          }
+        }
+      }
+    };
+    checkEvents();
+  }, [familyTrees, popupDismissed]);
 
   // --- ĐỒNG HỒ + LỊCH ÂM THỰC ---
   const [now, setNow] = useState(new Date());
@@ -740,6 +779,13 @@ export default function App() {
               >
                 <UserPlus className="h-3 w-3" />
                 Thêm thành viên
+              </button>
+              <button
+                onClick={() => setIsEventsModalOpen(true)}
+                className="bg-white/20 hover:bg-white/30 text-white rounded px-2 py-1 text-[10px] sm:text-xs font-medium flex items-center gap-1 transition-colors relative"
+              >
+                <Bell className="h-3 w-3" />
+                <span className="hidden sm:inline">Sự kiện</span>
               </button>
             </div>
 
@@ -1390,6 +1436,59 @@ export default function App() {
                   Xóa
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Events Modal */}
+      {isEventsModalOpen && (
+        <EventsModal
+          treeId={currentTreeId}
+          treeName={currentTree.name}
+          onClose={() => setIsEventsModalOpen(false)}
+        />
+      )}
+
+      {/* Popup thông báo sự kiện sắp tới */}
+      {upcomingPopup.length > 0 && !popupDismissed && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm w-full">
+          <div className="bg-white rounded-2xl shadow-2xl border border-amber-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-500 to-[#b48a28] px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-white animate-bounce" />
+                <span className="text-white font-bold text-sm">Sự kiện sắp tới!</span>
+              </div>
+              <button onClick={() => setPopupDismissed(true)} className="text-white/80 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-3 space-y-2 max-h-60 overflow-y-auto">
+              {upcomingPopup.map(ev => (
+                <div key={ev.id} className="flex items-start gap-2 p-2 bg-amber-50 rounded-xl border border-amber-100">
+                  <PartyPopper className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-gray-900 text-xs">{ev.name}</p>
+                    <div className="flex gap-2 mt-0.5">
+                      {ev.solarDate && (
+                        <span className="text-[10px] text-gray-500">☀️ {new Date(ev.solarDate).toLocaleDateString('vi-VN')}</span>
+                      )}
+                      {ev.lunarDay && ev.lunarMonth && (
+                        <span className="text-[10px] text-gray-500">🌙 {ev.lunarDay}/{ev.lunarMonth}</span>
+                      )}
+                    </div>
+                    {ev.note && <p className="text-[10px] text-gray-400 italic mt-0.5">{ev.note}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="px-3 pb-3">
+              <button
+                onClick={() => { setPopupDismissed(true); setIsEventsModalOpen(true); }}
+                className="w-full bg-[#b48a28] text-white py-2 rounded-xl text-xs font-bold hover:bg-[#9a7522] transition-colors"
+              >
+                Xem tất cả sự kiện
+              </button>
             </div>
           </div>
         </div>
