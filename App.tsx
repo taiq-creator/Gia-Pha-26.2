@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { Search, Plus, User, Trash2, Edit2, MapPin, BookOpen, Users, X, Calendar, Upload, ChevronDown, ChevronRight, List, Network, ZoomIn, ZoomOut, Maximize, ChevronUp, UserPlus, Download, Check } from 'lucide-react';
+import { Search, Plus, User, Trash2, Edit2, MapPin, BookOpen, Users, X, Calendar, Upload, ChevronDown, ChevronRight, List, Network, ZoomIn, ZoomOut, Maximize, ChevronUp, UserPlus, Download, Check, LogOut } from 'lucide-react';
 import { Member, FamilyTree } from './types';
 import { initialMembers } from './data';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { supabase } from './supabaseClient';
+import AuthPage from './AuthPage';
 
 interface FamilyNodeData {
   mainMember: Member;
@@ -81,6 +82,24 @@ const FamilyTreeNode = React.memo(({ node, onOpenDetail }: { node: FamilyNodeDat
 FamilyTreeNode.displayName = 'FamilyTreeNode';
 
 export default function App() {
+  const [session, setSession] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   const [familyTrees, setFamilyTrees] = useState<FamilyTree[]>([]);
   const [currentTreeId, setCurrentTreeId] = useState<string>('1');
   const [isLoading, setIsLoading] = useState(true);
@@ -443,6 +462,17 @@ export default function App() {
     );
   };
 
+  if (authLoading) return (
+    <div className="h-screen flex items-center justify-center bg-[#0a192f]">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-[#b48a28] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="font-bold text-[#b48a28] text-sm tracking-widest uppercase">Đang tải...</p>
+      </div>
+    </div>
+  );
+
+  if (!session) return <AuthPage />;
+
   if (isLoading) return (
     <div className="h-screen flex items-center justify-center bg-[#fdf8f6]">
       <div className="text-center">
@@ -589,6 +619,14 @@ export default function App() {
                   className="w-full sm:w-40 pl-6 pr-2 py-1 bg-white/10 rounded text-[10px] sm:text-xs text-white placeholder-white/50 outline-none border border-white/20 focus:border-white/50"
                 />
               </div>
+
+              <button
+                onClick={handleLogout}
+                title="Đăng xuất"
+                className="bg-white/10 hover:bg-red-500/40 text-white rounded p-1.5 flex items-center justify-center transition-colors ml-1"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
         </header>
