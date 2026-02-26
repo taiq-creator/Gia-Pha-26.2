@@ -685,76 +685,37 @@ export default function App() {
     <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden">
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
-        <div className="h-24 sm:h-32 w-full relative overflow-hidden">
+        <div className="h-28 sm:h-36 w-full relative overflow-hidden">
           <img
             src={currentTree.coverImage || "https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=2000&auto=format&fit=crop"}
             alt="Cover"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/45"></div>
 
-          {/* Đồng hồ + lịch trên ảnh bìa - góc trái dưới */}
-          <div className="absolute bottom-2 left-3 z-10 flex items-end gap-3">
-            {/* Giờ lớn */}
-            <div className="flex flex-col items-start">
-              <span className="text-white font-black tabular-nums leading-none drop-shadow-lg"
-                style={{ fontSize: 'clamp(22px, 4vw, 32px)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
-                {timeStr}
-              </span>
-            </div>
-            {/* Đường dọc ngăn cách */}
-            <div className="w-px h-8 bg-white/30 self-center"></div>
-            {/* Lịch dương + âm */}
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1">
-                <span className="text-[10px]">☀️</span>
-                <span className="text-white text-[11px] font-semibold drop-shadow"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
-                  {solarStr}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[10px]">🌙</span>
-                <span className="text-yellow-200 text-[11px] font-semibold drop-shadow"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
-                  Âm lịch: {lunarStr}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute top-2 right-2 opacity-0 group-hover/cover:opacity-100 transition-opacity z-10">
-            <button
-              onClick={() => coverInputRef.current?.click()}
-              className="bg-black/50 hover:bg-black/70 text-white rounded p-1.5 text-xs flex items-center gap-1 backdrop-blur-sm transition-colors cursor-pointer"
-            >
-              <Edit2 className="h-3 w-3" />
-              <span className="hidden sm:inline">Đổi ảnh bìa</span>
-            </button>
-            <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
-          </div>
-
-          <div className="absolute inset-0 flex items-center justify-center">
+          {/* Tên bìa - căn giữa phía trên */}
+          <div className="absolute top-0 left-0 right-0 flex items-start justify-center pt-3 px-16">
             {isEditingCoverText ? (
               <div className="flex items-center gap-2 bg-black/50 p-2 rounded backdrop-blur-sm">
                 <input
                   type="text"
                   value={tempCoverText}
                   onChange={(e) => setTempCoverText(e.target.value)}
-                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-xl sm:text-3xl font-serif font-bold tracking-widest uppercase text-center w-64"
+                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-lg sm:text-2xl font-serif font-bold tracking-widest uppercase text-center w-56"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSaveCoverText();
                     if (e.key === 'Escape') setIsEditingCoverText(false);
                   }}
                 />
-                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-5 w-5" /></button>
-                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-5 w-5" /></button>
+                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-4 w-4" /></button>
+                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-4 w-4" /></button>
               </div>
             ) : (
               <div className="group/text relative flex items-center">
-                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-widest uppercase drop-shadow-lg text-center px-4">
+                <h1 className="text-xl sm:text-3xl font-serif font-bold text-white tracking-widest uppercase text-center"
+                  style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
                   {currentTree.coverText || currentTree.name}
                 </h1>
                 <button
@@ -762,12 +723,49 @@ export default function App() {
                     setTempCoverText(currentTree.coverText || currentTree.name);
                     setIsEditingCoverText(true);
                   }}
-                  className="absolute -right-8 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
+                  className="absolute -right-7 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Edit2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Đồng hồ + lịch + nút đổi ảnh - hàng dưới cùng */}
+          <div className="absolute bottom-0 left-0 right-0 px-3 pb-1.5 flex items-end justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-black tabular-nums text-base leading-none"
+                style={{ textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
+                {timeStr}
+              </span>
+              <div className="w-px h-5 bg-white/30 self-center"></div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[9px]">☀️</span>
+                  <span className="text-white text-[10px] font-semibold leading-tight"
+                    style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
+                    {solarStr}
+                  </span>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[9px]">🌙</span>
+                  <span className="text-yellow-200 text-[10px] font-semibold leading-tight"
+                    style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
+                    Âm lịch: {lunarStr}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="opacity-0 group-hover/cover:opacity-100 transition-opacity">
+              <button
+                onClick={() => coverInputRef.current?.click()}
+                className="bg-black/50 hover:bg-black/70 text-white rounded p-1 text-[10px] flex items-center gap-1 backdrop-blur-sm transition-colors cursor-pointer"
+              >
+                <Edit2 className="h-3 w-3" />
+                <span className="hidden sm:inline">Đổi ảnh bìa</span>
+              </button>
+              <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
+            </div>
           </div>
         </div>
 
