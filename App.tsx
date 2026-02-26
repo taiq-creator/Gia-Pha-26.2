@@ -366,28 +366,70 @@ export default function App() {
   const handleMouseUp = () => setIsDragging(false);
 
   const handleDownloadPDF = async () => {
-    if (!treeContainerRef.current) return;
     try {
       setIsDownloading(true);
-      const originalTransform = treeContainerRef.current.style.transform;
-      treeContainerRef.current.style.transform = 'none';
-      const canvas = await html2canvas(treeContainerRef.current, {
+
+      // Tạo div ẩn bên ngoài viewport để render toàn bộ sơ đồ
+      const printDiv = document.createElement('div');
+      printDiv.style.cssText = `
+        position: fixed;
+        top: -99999px;
+        left: -99999px;
+        background: #fff9f0;
+        padding: 40px;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: Inter, sans-serif;
+        min-width: 800px;
+      `;
+
+      // Clone nội dung sơ đồ (không có transform pan/zoom)
+      if (treeContainerRef.current) {
+        const clone = treeContainerRef.current.cloneNode(true) as HTMLElement;
+        clone.style.cssText = `
+          position: static;
+          transform: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px;
+        `;
+        printDiv.appendChild(clone);
+      }
+
+      document.body.appendChild(printDiv);
+
+      // Đợi render xong
+      await new Promise(r => setTimeout(r, 300));
+
+      const canvas = await html2canvas(printDiv, {
         scale: 2,
-        backgroundColor: '#fdf8f6',
+        backgroundColor: '#fff9f0',
         logging: false,
         useCORS: true,
+        allowTaint: true,
+        scrollX: 0,
+        scrollY: 0,
+        width: printDiv.scrollWidth,
+        height: printDiv.scrollHeight,
+        windowWidth: printDiv.scrollWidth,
+        windowHeight: printDiv.scrollHeight,
       });
-      treeContainerRef.current.style.transform = originalTransform;
+
+      document.body.removeChild(printDiv);
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
         unit: 'px',
-        format: [canvas.width, canvas.height]
+        format: [canvas.width / 2, canvas.height / 2]
       });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
       pdf.save(`${currentTree.name || 'gia-pha'}.pdf`);
     } catch (err) {
       console.error('PDF error:', err);
+      alert('Xuất PDF thất bại. Vui lòng thử lại.');
     } finally {
       setIsDownloading(false);
     }
