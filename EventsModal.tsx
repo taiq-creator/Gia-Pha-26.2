@@ -1,5 +1,3 @@
-import { X } from 'lucide-react'
-
 interface EventsModalProps {
   isOpen: boolean
   onClose: () => void
@@ -24,9 +22,10 @@ export default function EventsModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-lg"
+          aria-label="Close"
         >
-          <X size={18} />
+          ×
         </button>
 
         {/* Title */}
