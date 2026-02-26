@@ -21,65 +21,136 @@ body {
   color: var(--color-brown-900);
 }
 
-/* Family Tree CSS */
+/* ========================= */
+/* FAMILY TREE CSS CŨ        */
+/* ========================= */
 .family-tree ul {
   padding-top: 10px;
   position: relative;
   display: flex;
   justify-content: center;
 }
-
 .family-tree li {
   text-align: center;
   list-style-type: none;
   position: relative;
   padding: 10px 4px 0 4px;
 }
-
 .family-tree li::before, .family-tree li::after {
   content: '';
   position: absolute;
   top: 0;
   right: 50%;
-  border-top: 1px solid var(--color-brown-400);
+  border-top: 1px solid #94a3b8;
   width: 50%;
   height: 10px;
 }
-
 .family-tree li::after {
   right: auto;
   left: 50%;
-  border-left: 1px solid var(--color-brown-400);
+  border-left: 1px solid #94a3b8;
 }
-
-.family-tree li:only-child::after, .family-tree li:only-child::before {
-  display: none;
-}
-
-.family-tree li:only-child {
-  padding-top: 0;
-}
-
-.family-tree li:first-child::before, .family-tree li:last-child::after {
-  border: 0 none;
-}
-
+.family-tree li:only-child::after,
+.family-tree li:only-child::before { display: none; }
+.family-tree li:only-child { padding-top: 0; }
+.family-tree li:first-child::before,
+.family-tree li:last-child::after { border: 0 none; }
 .family-tree li:last-child::before {
-  border-right: 1px solid var(--color-brown-400);
+  border-right: 1px solid #94a3b8;
   border-radius: 0 3px 0 0;
 }
-
-.family-tree li:first-child::after {
-  border-radius: 3px 0 0 0;
-}
-
+.family-tree li:first-child::after { border-radius: 3px 0 0 0; }
 .family-tree ul ul::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
-  border-left: 1px solid var(--color-brown-400);
+  border-left: 1px solid #94a3b8;
   width: 0;
   height: 10px;
   transform: translateX(-50%);
+}
+
+/* ========================= */
+/* FAMILY TREE CSS MỚI ĐẸP   */
+/* ========================= */
+
+.family-tree-new {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.family-tree-new li {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Đường dọc từ card xuống nhánh con */
+.family-tree-new li > .tree-children {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  padding-top: 24px;
+}
+
+/* Đường dọc chính từ cha xuống */
+.family-tree-new li > .tree-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 24px;
+  background: #3b82f6;
+}
+
+/* Đường ngang nối tất cả con */
+.family-tree-new li > .tree-children::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(48px);
+  right: calc(48px);
+  height: 2px;
+  background: #3b82f6;
+}
+
+/* Chỉ 1 con: ẩn đường ngang */
+.family-tree-new li > .tree-children.single-child::after {
+  display: none;
+}
+
+/* Mỗi node con */
+.family-tree-new .tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding-top: 22px;
+}
+
+/* Đường dọc từ ngang xuống mỗi con */
+.family-tree-new .tree-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 22px;
+  background: #3b82f6;
+}
+
+/* Node duy nhất không cần đường ngang, chỉ cần đường thẳng */
+.family-tree-new .tree-node.only-child::before {
+  height: 24px;
 }

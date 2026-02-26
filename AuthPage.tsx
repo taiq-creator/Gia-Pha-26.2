@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
-import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, KeyRound, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, KeyRound, ArrowLeft, CheckCircle, ShieldCheck, Users } from 'lucide-react';
 
 type AuthMode = 'login' | 'register' | 'forgot';
 
@@ -65,7 +65,7 @@ export default function AuthPage() {
         setError('Đăng ký thất bại. Vui lòng thử lại.');
       }
     } else {
-      setSuccessMsg('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản, sau đó đăng nhập.');
+      setSuccessMsg('Đăng ký thành công! Kiểm tra email để xác nhận tài khoản, sau đó đăng nhập.');
     }
     setIsLoading(false);
   };
@@ -80,7 +80,7 @@ export default function AuthPage() {
     if (error) {
       setError('Gửi email thất bại. Vui lòng kiểm tra địa chỉ email.');
     } else {
-      setSuccessMsg('Đã gửi link đặt lại mật khẩu! Kiểm tra hộp thư của bạn (kể cả thư mục spam).');
+      setSuccessMsg('Đã gửi link đặt lại mật khẩu! Kiểm tra hộp thư (kể cả thư mục spam).');
     }
     setIsLoading(false);
   };
@@ -103,6 +103,26 @@ export default function AuthPage() {
             Lưu giữ ký ức dòng họ
           </p>
         </div>
+
+        {/* Phân quyền info — chỉ hiện ở trang login */}
+        {mode === 'login' && (
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 flex items-start gap-2">
+              <ShieldCheck className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-yellow-400 text-[10px] font-bold uppercase tracking-wide">Admin</p>
+                <p className="text-white/60 text-[10px] mt-0.5">Toàn quyền thêm, sửa, xóa thành viên</p>
+              </div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-start gap-2">
+              <Users className="h-4 w-4 text-white/50 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-white/60 text-[10px] font-bold uppercase tracking-wide">Thành viên</p>
+                <p className="text-white/40 text-[10px] mt-0.5">Xem, thêm và sửa thành viên</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -132,7 +152,7 @@ export default function AuthPage() {
 
           {/* Card Body */}
           <div className="p-6">
-            {/* Success Message */}
+            {/* Success */}
             {successMsg && (
               <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
                 <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -140,14 +160,14 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* Error Message */}
+            {/* Error */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
                 <p className="text-sm text-red-600 font-medium">{error}</p>
               </div>
             )}
 
-            {/* LOGIN FORM */}
+            {/* LOGIN */}
             {mode === 'login' && !successMsg && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
@@ -200,19 +220,15 @@ export default function AuthPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#b48a28] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#9a7522] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
+                  className="w-full bg-[#b48a28] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#9a7522] transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
                 >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <LogIn className="h-4 w-4" />
-                      Đăng nhập
-                    </>
-                  )}
+                  {isLoading
+                    ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    : <><LogIn className="h-4 w-4" /> Đăng nhập</>
+                  }
                 </button>
 
-                <div className="text-center pt-2">
+                <div className="text-center pt-1">
                   <span className="text-[12px] text-gray-500">Chưa có tài khoản? </span>
                   <button
                     type="button"
@@ -225,9 +241,13 @@ export default function AuthPage() {
               </form>
             )}
 
-            {/* REGISTER FORM */}
+            {/* REGISTER */}
             {mode === 'register' && !successMsg && (
               <form onSubmit={handleRegister} className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-[11px] text-blue-700 font-medium">
+                  💡 Tài khoản mới sẽ có quyền <strong>xem, thêm và sửa</strong> thành viên gia phả.
+                </div>
+
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1.5">Email</label>
                   <div className="relative">
@@ -283,19 +303,15 @@ export default function AuthPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#b48a28] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#9a7522] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
+                  className="w-full bg-[#b48a28] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#9a7522] transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
                 >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <UserPlus className="h-4 w-4" />
-                      Tạo tài khoản
-                    </>
-                  )}
+                  {isLoading
+                    ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    : <><UserPlus className="h-4 w-4" /> Tạo tài khoản</>
+                  }
                 </button>
 
-                <div className="text-center pt-2">
+                <div className="text-center pt-1">
                   <span className="text-[12px] text-gray-500">Đã có tài khoản? </span>
                   <button
                     type="button"
@@ -308,7 +324,7 @@ export default function AuthPage() {
               </form>
             )}
 
-            {/* FORGOT PASSWORD FORM */}
+            {/* FORGOT PASSWORD */}
             {mode === 'forgot' && !successMsg && (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
@@ -329,21 +345,17 @@ export default function AuthPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#b48a28] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#9a7522] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
+                  className="w-full bg-[#b48a28] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#9a7522] transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
                 >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <KeyRound className="h-4 w-4" />
-                      Gửi link đặt lại mật khẩu
-                    </>
-                  )}
+                  {isLoading
+                    ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    : <><KeyRound className="h-4 w-4" /> Gửi link đặt lại mật khẩu</>
+                  }
                 </button>
               </form>
             )}
 
-            {/* After success - back to login */}
+            {/* Back to login after success */}
             {successMsg && (
               <button
                 onClick={() => switchMode('login')}

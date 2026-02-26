@@ -25,60 +25,77 @@ const calculateAge = (birthDate?: string, deathDate?: string) => {
   return age;
 };
 
-const MemberTreeCard = React.memo(({ member, isSpouse = false, onOpenDetail }: { member: Member, isSpouse?: boolean, onOpenDetail: (m: Member) => void }) => (
-  <div
-    onClick={() => onOpenDetail(member)}
-    className={`bg-white border ${isSpouse ? 'border-brown-100' : 'border-brown-300'} rounded shadow-sm p-1 w-16 flex flex-col items-center cursor-pointer hover:border-brown-500 hover:shadow-md transition-all z-10 relative`}
-  >
-    <div className="relative mb-0.5">
-      {member.imageUrl ? (
-        <img
-          src={member.imageUrl}
-          alt={member.fullName}
-          className="w-5 h-5 rounded-full object-cover border border-brown-100"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <div className="w-5 h-5 rounded-full bg-brown-50 flex items-center justify-center border border-brown-100">
-          <User className="h-2.5 w-2.5 text-brown-400" />
-        </div>
-      )}
+const MemberTreeCard = React.memo(({ member, isSpouse = false, onOpenDetail }: { member: Member, isSpouse?: boolean, onOpenDetail: (m: Member) => void }) => {
+  const isMale = member.gender === 'male';
+  const borderColor = isMale ? '#22c55e' : '#f97316';
+  const bgHeader = isMale ? '#dcfce7' : '#ffedd5';
+  const textColor = isMale ? '#15803d' : '#c2410c';
+  return (
+    <div
+      onClick={() => onOpenDetail(member)}
+      style={{ borderColor, boxShadow: `0 2px 8px ${borderColor}40` }}
+      className="bg-white rounded-xl border-2 w-24 flex flex-col items-center cursor-pointer hover:scale-105 transition-all z-10 relative overflow-hidden select-none"
+    >
+      {/* Header màu theo giới tính */}
+      <div style={{ backgroundColor: bgHeader }} className="w-full flex justify-center pt-2 pb-1">
+        {member.imageUrl ? (
+          <img
+            src={member.imageUrl}
+            alt={member.fullName}
+            className="w-14 h-14 rounded-full object-cover border-2"
+            style={{ borderColor }}
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-14 h-14 rounded-full flex items-center justify-center border-2 bg-white" style={{ borderColor }}>
+            <User className="h-7 w-7" style={{ color: borderColor }} />
+          </div>
+        )}
+      </div>
+      {/* Tên */}
+      <div className="px-1 py-1.5 text-center w-full">
+        <p className="text-[10px] font-bold text-gray-800 leading-tight line-clamp-2">{member.fullName}</p>
+        <p className="text-[8px] mt-0.5 font-semibold" style={{ color: textColor }}>
+          {member.birthDate ? new Date(member.birthDate).getFullYear() : '?'}
+          {member.deathDate ? ` - ${new Date(member.deathDate).getFullYear()}` : ''}
+        </p>
+      </div>
     </div>
-    <h4 className="text-[8px] font-bold text-brown-900 text-center line-clamp-2 leading-tight">
-      {member.fullName}
-    </h4>
-    <span className={`mt-0.5 inline-flex items-center px-1 py-0.5 rounded text-[6px] font-medium ${
-      member.gender === 'male' ? 'bg-blue-50 text-blue-700' : 'bg-rose-50 text-rose-700'
-    }`}>
-      {member.gender === 'male' ? 'Nam' : 'Nữ'}
-    </span>
-    <span className="text-[6px] text-brown-500 mt-0.5">
-      {member.birthDate ? new Date(member.birthDate).getFullYear() : '?'} - {member.deathDate ? new Date(member.deathDate).getFullYear() : 'Nay'}
-    </span>
-  </div>
-));
+  );
+});
 MemberTreeCard.displayName = 'MemberTreeCard';
 
-const FamilyTreeNode = React.memo(({ node, onOpenDetail }: { node: FamilyNodeData, onOpenDetail: (m: Member) => void }) => (
-  <li>
-    <div className="flex justify-center items-center gap-1.5 relative">
-      <MemberTreeCard member={node.mainMember} onOpenDetail={onOpenDetail} />
-      {node.spouses.map(spouse => (
-        <div key={spouse.id} className="flex items-center gap-1.5">
-          <div className="w-2 h-px bg-brown-400"></div>
-          <MemberTreeCard member={spouse} isSpouse onOpenDetail={onOpenDetail} />
-        </div>
-      ))}
-    </div>
-    {node.children.length > 0 && (
-      <ul>
-        {node.children.map(child => (
-          <FamilyTreeNode key={child.mainMember.id} node={child} onOpenDetail={onOpenDetail} />
+const FamilyTreeNode = React.memo(({ node, onOpenDetail }: { node: FamilyNodeData, onOpenDetail: (m: Member) => void }) => {
+  const hasChildren = node.children.length > 0;
+  const singleChild = node.children.length === 1;
+  return (
+    <li className="flex flex-col items-center" style={{ listStyle: 'none' }}>
+      {/* Cặp vợ chồng */}
+      <div className="flex justify-center items-center relative">
+        <MemberTreeCard member={node.mainMember} onOpenDetail={onOpenDetail} />
+        {node.spouses.map((spouse) => (
+          <div key={spouse.id} className="flex items-center">
+            {/* Đường nối đỏ vợ chồng */}
+            <div style={{ width: 20, height: 3, background: '#ef4444', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', position: 'absolute' }}></div>
+            </div>
+            <MemberTreeCard member={spouse} isSpouse onOpenDetail={onOpenDetail} />
+          </div>
         ))}
-      </ul>
-    )}
-  </li>
-));
+      </div>
+      {/* Con cái */}
+      {hasChildren && (
+        <div className={`tree-children ${singleChild ? 'single-child' : ''}`}>
+          {node.children.map(child => (
+            <div key={child.mainMember.id} className={`tree-node ${singleChild ? 'only-child' : ''}`}>
+              <FamilyTreeNode node={child} onOpenDetail={onOpenDetail} />
+            </div>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+});
 FamilyTreeNode.displayName = 'FamilyTreeNode';
 
 export default function App() {
@@ -99,6 +116,9 @@ export default function App() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
+
+  const ADMIN_EMAIL = 'taiketnoi@gmail.com';
+  const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
   const [familyTrees, setFamilyTrees] = useState<FamilyTree[]>([]);
   const [currentTreeId, setCurrentTreeId] = useState<string>('1');
@@ -627,6 +647,12 @@ export default function App() {
               >
                 <LogOut className="h-3.5 w-3.5" />
               </button>
+
+              <div className="hidden sm:flex items-center gap-1.5 ml-1 pl-2 border-l border-white/20">
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isAdmin ? 'bg-yellow-400 text-yellow-900' : 'bg-white/20 text-white'}`}>
+                  {isAdmin ? '👑 Admin' : '👤 Khách'}
+                </span>
+              </div>
             </div>
           </div>
         </header>
@@ -724,12 +750,14 @@ export default function App() {
         ) : (
           /* Tree View */
           <div
-            className="flex-1 bg-brown-50 overflow-hidden relative cursor-grab active:cursor-grabbing select-none"
+            className="flex-1 overflow-hidden relative cursor-grab active:cursor-grabbing select-none"
+            style={{ background: 'linear-gradient(180deg, #fff9f0 0%, #fef3e2 100%)' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           >
+            {/* Zoom Controls */}
             <div className="absolute top-3 right-3 z-20 flex flex-col gap-1.5">
               <button onClick={() => setZoom(z => Math.min(z + 0.15, 3))} className="bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors border border-gray-200">
                 <ZoomIn className="h-4 w-4 text-gray-600" />
@@ -749,16 +777,54 @@ export default function App() {
                 transformOrigin: 'center top',
                 transition: isDragging ? 'none' : 'transform 0.1s ease'
               }}
-              className="absolute inset-0 flex items-start justify-center pt-8 family-tree"
+              className="absolute inset-0 flex flex-col items-center pt-4 family-tree"
             >
+              {/* ===== BANNER TRUYỀN THỐNG ===== */}
+              <div className="relative flex items-center justify-center mb-6 select-none" style={{ width: 520, height: 130 }}>
+                {/* Nền banner đỏ */}
+                <div className="absolute inset-x-8 inset-y-6 rounded-2xl shadow-2xl" style={{ background: 'linear-gradient(135deg, #c0392b 0%, #e74c3c 40%, #c0392b 100%)', border: '4px solid #f39c12' }}></div>
+                {/* Viền vàng trang trí */}
+                <div className="absolute inset-x-10 inset-y-8 rounded-xl border-2 border-yellow-300 opacity-60"></div>
+                {/* Chim hạc trái */}
+                <div className="absolute left-0 top-2 text-4xl" style={{ transform: 'scaleX(-1)', filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }}>🦢</div>
+                <div className="absolute left-6 top-0 text-2xl opacity-80">🌸</div>
+                {/* Chim hạc phải */}
+                <div className="absolute right-0 top-2 text-4xl" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }}>🦢</div>
+                <div className="absolute right-6 top-0 text-2xl opacity-80">🌸</div>
+                {/* Hoa trang trí */}
+                <div className="absolute left-12 bottom-1 text-xl opacity-70">🌺</div>
+                <div className="absolute right-12 bottom-1 text-xl opacity-70">🌺</div>
+                <div className="absolute left-24 top-1 text-sm opacity-60">✨</div>
+                <div className="absolute right-24 top-1 text-sm opacity-60">✨</div>
+                {/* Nội dung chữ */}
+                <div className="relative z-10 text-center px-12">
+                  <p className="text-yellow-200 text-[11px] font-bold tracking-widest uppercase mb-0.5" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                    Đại Gia Đình
+                  </p>
+                  <h2 className="text-white font-black tracking-widest uppercase leading-tight" style={{ fontSize: 20, textShadow: '2px 2px 4px rgba(0,0,0,0.5)', letterSpacing: '0.15em' }}>
+                    {currentTree.coverText || currentTree.name}
+                  </h2>
+                  {/* Trang trí dưới chữ */}
+                  <div className="flex items-center justify-center gap-2 mt-1">
+                    <div className="h-px w-8 bg-yellow-300 opacity-80"></div>
+                    <span className="text-yellow-300 text-xs">❖</span>
+                    <div className="h-px w-8 bg-yellow-300 opacity-80"></div>
+                  </div>
+                </div>
+                {/* Góc trang trí */}
+                <div className="absolute top-5 left-8 text-yellow-400 text-lg opacity-70">🐉</div>
+                <div className="absolute top-5 right-8 text-yellow-400 text-lg opacity-70" style={{ transform: 'scaleX(-1)' }}>🐉</div>
+              </div>
+
+              {/* ===== SƠ ĐỒ CÂY ===== */}
               {familyTreeData.length > 0 ? (
-                <ul className="flex gap-8">
+                <ul className="family-tree-new">
                   {familyTreeData.map(node => (
                     <FamilyTreeNode key={node.mainMember.id} node={node} onOpenDetail={handleOpenDetail} />
                   ))}
                 </ul>
               ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-brown-400">
+                <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                   <Network className="h-12 w-12 mb-3 opacity-30" />
                   <p className="text-sm font-medium">Chưa có dữ liệu để hiển thị sơ đồ</p>
                   <p className="text-xs mt-1 opacity-60">Thêm thành viên và thiết lập quan hệ để xem sơ đồ</p>
