@@ -228,38 +228,64 @@ export default function App() {
   }, [generations, selectedGen]);
 
   const familyTreeData = useMemo(() => {
-    const getChildren = (parentId: string): Member[] => {
-      return members.filter(m =>
+    if (members.length === 0) return [];
+
+    const getChildren = (parentId: string): Member[] =>
+      members.filter(m =>
         (m.relationshipType === 'Con trai của' || m.relationshipType === 'Con gái của') &&
         m.relatedMemberId === parentId
       );
-    };
-    const getSpouses = (memberId: string): Member[] => {
-      return members.filter(m =>
+
+    const getSpouses = (memberId: string): Member[] =>
+      members.filter(m =>
         (m.relationshipType === 'Vợ của' || m.relationshipType === 'Chồng của') &&
         m.relatedMemberId === memberId
       );
-    };
+
+    // Tập hợp id đã được render để tránh lặp vô hạn
+    const visited = new Set<string>();
+
     const buildUnit = (member: Member): FamilyNodeData => {
-      const spouses = getSpouses(member.id);
-      const children = [
+      visited.add(member.id);
+      const spouses = getSpouses(member.id).filter(s => !visited.has(s.id));
+      spouses.forEach(s => visited.add(s.id));
+
+      const childrenRaw = [
         ...getChildren(member.id),
         ...spouses.flatMap(s => getChildren(s.id))
       ];
-      const uniqueChildren = Array.from(new Set(children.map(c => c.id)))
-        .map(id => children.find(c => c.id === id)!);
-      return { mainMember: member, spouses, children: uniqueChildren.map(buildUnit) };
+      const uniqueChildren = Array.from(new Map(childrenRaw.map(c => [c.id, c])).values())
+        .filter(c => !visited.has(c.id));
+
+      return {
+        mainMember: member,
+        spouses,
+        children: uniqueChildren.map(buildUnit)
+      };
     };
-    const roots = members.filter(m => {
-      const isChild = m.relationshipType === 'Con trai của' || m.relationshipType === 'Con gái của';
-      const isSpouse = m.relationshipType === 'Vợ của' || m.relationshipType === 'Chồng của';
-      return !isChild && !isSpouse;
-    });
-    if (roots.length === 0 && members.length > 0) {
-      const gen1 = members.filter(m => m.generation === 1);
-      const gen1Roots = gen1.filter(m => m.relationshipType !== 'Vợ của' && m.relationshipType !== 'Chồng của');
-      return gen1Roots.map(buildUnit);
+
+    // ID của tất cả người là con hoặc vợ/chồng của ai đó
+    const childIds = new Set(
+      members
+        .filter(m => m.relationshipType === 'Con trai của' || m.relationshipType === 'Con gái của')
+        .map(m => m.id)
+    );
+    const spouseIds = new Set(
+      members
+        .filter(m => m.relationshipType === 'Vợ của' || m.relationshipType === 'Chồng của')
+        .map(m => m.id)
+    );
+
+    // Root = không phải con của ai, không phải vợ/chồng của ai
+    const roots = members.filter(m => !childIds.has(m.id) && !spouseIds.has(m.id));
+
+    // Nếu không có root rõ ràng → lấy đời thấp nhất làm root
+    if (roots.length === 0) {
+      const minGen = Math.min(...members.map(m => m.generation));
+      const gen1 = members.filter(m => m.generation === minGen && !spouseIds.has(m.id));
+      return gen1.map(buildUnit);
     }
+
     return roots.map(buildUnit);
   }, [members]);
 
