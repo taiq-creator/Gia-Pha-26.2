@@ -229,68 +229,66 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
+      <div className="relative z-10 bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="bg-[#b48a28] px-6 py-4 flex justify-between items-center flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <PartyPopper className="h-5 w-5 text-white" />
-            </div>
+        <div className="bg-[#b48a28] px-4 py-2.5 flex justify-between items-center flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <PartyPopper className="h-4 w-4 text-white" />
             <div>
-              <h3 className="text-white font-black text-base">Sự kiện gia phả</h3>
-              <p className="text-white/70 text-[11px] mt-0.5">{treeName} · {events.length} sự kiện</p>
+              <h3 className="text-white font-black text-sm leading-tight">Sự kiện gia phả</h3>
+              <p className="text-white/70 text-[10px]">{treeName} · {events.length} sự kiện</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button onClick={openNewForm}
-              className="bg-white text-[#b48a28] rounded-xl px-4 py-2 text-xs font-black flex items-center gap-1.5 hover:bg-white/90 transition-colors shadow">
-              <Plus className="h-3.5 w-3.5" /> Tạo sự kiện
+              className="bg-white text-[#b48a28] rounded-lg px-3 py-1.5 text-[11px] font-black flex items-center gap-1 hover:bg-white/90 transition-colors shadow">
+              <Plus className="h-3 w-3" /> Tạo mới
             </button>
-            <button onClick={onClose} className="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center">
-              <X className="h-4 w-4 text-white" />
+            <button onClick={onClose} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center">
+              <X className="h-3.5 w-3.5 text-white" />
             </button>
           </div>
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 p-5">
+        <div className="overflow-y-auto flex-1 p-3">
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="w-10 h-10 border-4 border-[#b48a28] border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex items-center justify-center py-10">
+              <div className="w-7 h-7 border-[3px] border-[#b48a28] border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-              <PartyPopper className="h-14 w-14 mb-4 opacity-20" />
-              <p className="text-base font-semibold">Chưa có sự kiện nào</p>
-              <p className="text-sm mt-1 opacity-60">Nhấn "Tạo sự kiện" để thêm mới</p>
+            <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+              <PartyPopper className="h-10 w-10 mb-2 opacity-20" />
+              <p className="text-sm font-semibold">Chưa có sự kiện nào</p>
+              <p className="text-xs mt-0.5 opacity-60">Nhấn "Tạo mới" để thêm</p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-3">
               {todayEvents.length > 0 && (
                 <section>
-                  <p className="text-[11px] font-black text-red-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                    <AlertCircle className="h-3.5 w-3.5" /> Hôm nay
+                  <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> Hôm nay
                   </p>
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     {todayEvents.map(ev => <EventCard key={ev.id} ev={ev} onEdit={openEditForm} onDelete={setDeleteId} onToggleNotify={toggleNotify} highlight="red" />)}
                   </div>
                 </section>
               )}
               {soonEvents.length > 0 && (
                 <section>
-                  <p className="text-[11px] font-black text-orange-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                    <Bell className="h-3.5 w-3.5" /> Sắp tới (30 ngày)
+                  <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                    <Bell className="h-3 w-3" /> Sắp tới (30 ngày)
                   </p>
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     {soonEvents.map(ev => <EventCard key={ev.id} ev={ev} onEdit={openEditForm} onDelete={setDeleteId} onToggleNotify={toggleNotify} highlight="orange" />)}
                   </div>
                 </section>
               )}
               {otherEvents.length > 0 && (
                 <section>
-                  <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">Tất cả sự kiện</p>
-                  <div className="grid gap-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Tất cả sự kiện</p>
+                  <div className="grid gap-1.5">
                     {otherEvents.map(ev => <EventCard key={ev.id} ev={ev} onEdit={openEditForm} onDelete={setDeleteId} onToggleNotify={toggleNotify} highlight="none" />)}
                   </div>
                 </section>
@@ -301,57 +299,57 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
 
         {/* FORM TẠO/SỬA */}
         {isFormOpen && (
-          <div className="absolute inset-0 bg-white rounded-2xl flex flex-col z-20">
-            <div className="bg-[#b48a28] px-6 py-4 flex justify-between items-center flex-shrink-0 rounded-t-2xl">
-              <h3 className="text-white font-black text-base">
-                {editingEvent ? '✏️ Chỉnh sửa sự kiện' : '➕ Tạo sự kiện mới'}
+          <div className="absolute inset-0 bg-white rounded-xl flex flex-col z-20">
+            <div className="bg-[#b48a28] px-4 py-2.5 flex justify-between items-center flex-shrink-0 rounded-t-xl">
+              <h3 className="text-white font-black text-sm">
+                {editingEvent ? '✏️ Chỉnh sửa' : '➕ Tạo mới'}
               </h3>
-              <button onClick={() => setIsFormOpen(false)} className="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center">
-                <X className="h-4 w-4 text-white" />
+              <button onClick={() => setIsFormOpen(false)} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center">
+                <X className="h-3.5 w-3.5 text-white" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-5 overflow-y-auto flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSave} className="p-3 overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                 {/* Tên - full width */}
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Tên sự kiện *</label>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Tên sự kiện *</label>
                   <input type="text" required value={formName} onChange={e => setFormName(e.target.value)}
                     placeholder="VD: Giỗ tổ họ Cao, Sinh nhật ông Nội..."
-                    className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#b48a28] transition-colors" />
+                    className="w-full border-2 border-gray-100 rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#b48a28] transition-colors" />
                 </div>
 
                 {/* Dương lịch */}
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">☀️ Ngày dương lịch</label>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">☀️ Ngày dương lịch</label>
                   <input type="date" value={formSolarDate} onChange={e => setFormSolarDate(e.target.value)}
-                    className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#b48a28] transition-colors" />
+                    className="w-full border-2 border-gray-100 rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#b48a28] transition-colors" />
                 </div>
 
                 {/* Âm lịch tự động */}
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                     🌙 Âm lịch
                     {formLunarDay && formSolarDate && (
-                      <span className="text-[9px] text-green-600 font-bold normal-case bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">✓ Tự động</span>
+                      <span className="text-[9px] text-green-600 font-bold normal-case bg-green-50 px-1 py-0.5 rounded-full border border-green-200">✓ Tự động</span>
                     )}
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     <input type="number" min="1" max="30" value={formLunarDay}
                       onChange={e => setFormLunarDay(e.target.value)} placeholder="Ngày"
-                      className="w-20 flex-shrink-0 border-2 border-gray-100 rounded-xl px-3 py-3 text-sm font-medium text-center focus:outline-none focus:border-[#b48a28] transition-colors" />
+                      className="w-16 flex-shrink-0 border-2 border-gray-100 rounded-lg px-2 py-2 text-xs font-medium text-center focus:outline-none focus:border-[#b48a28] transition-colors" />
                     <select value={formLunarMonth}
                       onChange={e => { setFormLunarMonth(e.target.value); setFormLunarMonthName(LUNAR_MONTHS[parseInt(e.target.value) - 1]); }}
-                      className="flex-1 border-2 border-gray-100 rounded-xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#b48a28] transition-colors">
+                      className="flex-1 border-2 border-gray-100 rounded-lg px-2 py-2 text-xs font-medium focus:outline-none focus:border-[#b48a28] transition-colors">
                       {LUNAR_MONTHS.map((name, idx) => (
                         <option key={idx + 1} value={idx + 1}>Tháng {name}</option>
                       ))}
                     </select>
                   </div>
                   {formLunarDay && formSolarDate && (
-                    <p className="mt-1.5 text-[11px] text-[#b48a28] font-semibold flex items-center gap-1">
-                      <Moon className="h-3 w-3" />
+                    <p className="mt-1 text-[10px] text-[#b48a28] font-semibold flex items-center gap-1">
+                      <Moon className="h-2.5 w-2.5" />
                       Ngày {formLunarDay} tháng {formLunarMonthName} năm {formLunarYear}
                     </p>
                   )}
@@ -359,14 +357,14 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
 
                 {/* Lặp lại */}
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Lặp lại</label>
-                  <div className="flex gap-2 h-[46px]">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Lặp lại</label>
+                  <div className="flex gap-1.5 h-[34px]">
                     <button type="button" onClick={() => setFormRepeat('yearly')}
-                      className={`flex-1 rounded-xl text-xs font-bold border-2 transition-colors ${formRepeat === 'yearly' ? 'bg-[#b48a28] text-white border-[#b48a28]' : 'border-gray-100 text-gray-500 hover:bg-gray-50'}`}>
+                      className={`flex-1 rounded-lg text-[11px] font-bold border-2 transition-colors ${formRepeat === 'yearly' ? 'bg-[#b48a28] text-white border-[#b48a28]' : 'border-gray-100 text-gray-500 hover:bg-gray-50'}`}>
                       🔄 Hàng năm
                     </button>
                     <button type="button" onClick={() => setFormRepeat('once')}
-                      className={`flex-1 rounded-xl text-xs font-bold border-2 transition-colors ${formRepeat === 'once' ? 'bg-[#b48a28] text-white border-[#b48a28]' : 'border-gray-100 text-gray-500 hover:bg-gray-50'}`}>
+                      className={`flex-1 rounded-lg text-[11px] font-bold border-2 transition-colors ${formRepeat === 'once' ? 'bg-[#b48a28] text-white border-[#b48a28]' : 'border-gray-100 text-gray-500 hover:bg-gray-50'}`}>
                       1️⃣ Một lần
                     </button>
                   </div>
@@ -374,36 +372,36 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
 
                 {/* Thông báo */}
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Thông báo</label>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Thông báo</label>
                   <button type="button" onClick={() => setFormNotify(!formNotify)}
-                    className={`w-full h-[46px] rounded-xl text-xs font-bold border-2 transition-colors flex items-center justify-between px-4 ${formNotify ? 'bg-amber-50 border-amber-200 text-amber-800' : 'border-gray-100 text-gray-400 bg-gray-50'}`}>
-                    <span className="flex items-center gap-2">
-                      <Bell className={`h-4 w-4 ${formNotify ? 'text-amber-500' : 'text-gray-300'}`} />
+                    className={`w-full h-[34px] rounded-lg text-[11px] font-bold border-2 transition-colors flex items-center justify-between px-3 ${formNotify ? 'bg-amber-50 border-amber-200 text-amber-800' : 'border-gray-100 text-gray-400 bg-gray-50'}`}>
+                    <span className="flex items-center gap-1.5">
+                      <Bell className={`h-3 w-3 ${formNotify ? 'text-amber-500' : 'text-gray-300'}`} />
                       {formNotify ? 'Nhắc trước 1 ngày + đúng ngày' : 'Tắt thông báo'}
                     </span>
-                    <div className={`w-9 h-5 rounded-full relative transition-colors flex-shrink-0 ${formNotify ? 'bg-[#b48a28]' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${formNotify ? 'left-4' : 'left-0.5'}`}></div>
+                    <div className={`w-7 h-4 rounded-full relative transition-colors flex-shrink-0 ${formNotify ? 'bg-[#b48a28]' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${formNotify ? 'left-3.5' : 'left-0.5'}`}></div>
                     </div>
                   </button>
                 </div>
 
                 {/* Ghi chú - full width */}
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Ghi chú</label>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Ghi chú</label>
                   <textarea value={formNote} onChange={e => setFormNote(e.target.value)} rows={2}
                     placeholder="Mô tả thêm về sự kiện..."
-                    className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b48a28] transition-colors resize-none" />
+                    className="w-full border-2 border-gray-100 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#b48a28] transition-colors resize-none" />
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-5">
+              <div className="flex gap-2 mt-3">
                 <button type="button" onClick={() => setIsFormOpen(false)}
-                  className="flex-1 border-2 border-gray-100 text-gray-500 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
+                  className="flex-1 border-2 border-gray-100 text-gray-500 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
                   Hủy
                 </button>
                 <button type="submit" disabled={isSaving}
-                  className="flex-1 bg-[#b48a28] text-white py-3 rounded-xl text-sm font-black hover:bg-[#9a7522] transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow">
-                  {isSaving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                  className="flex-1 bg-[#b48a28] text-white py-2 rounded-lg text-xs font-black hover:bg-[#9a7522] transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5 shadow">
+                  {isSaving && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
                   {editingEvent ? 'Lưu thay đổi' : 'Tạo sự kiện'}
                 </button>
               </div>
@@ -416,19 +414,19 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
       {deleteId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/40" onClick={() => setDeleteId(null)}></div>
-          <div className="relative bg-white rounded-2xl p-6 w-full max-w-xs shadow-2xl z-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Trash2 className="h-6 w-6 text-red-600" />
+          <div className="relative bg-white rounded-xl p-4 w-full max-w-xs shadow-2xl z-10">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Trash2 className="h-4 w-4 text-red-600" />
               </div>
               <div>
-                <p className="font-black text-gray-900">Xóa sự kiện?</p>
-                <p className="text-xs text-gray-500 mt-0.5">Hành động này không thể hoàn tác.</p>
+                <p className="font-black text-gray-900 text-sm">Xóa sự kiện?</p>
+                <p className="text-xs text-gray-500">Hành động này không thể hoàn tác.</p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 border-2 border-gray-100 text-gray-600 py-2.5 rounded-xl text-sm font-bold">Hủy</button>
-              <button onClick={handleDelete} className="flex-1 bg-red-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-red-700">Xóa</button>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteId(null)} className="flex-1 border-2 border-gray-100 text-gray-600 py-2 rounded-lg text-xs font-bold">Hủy</button>
+              <button onClick={handleDelete} className="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-red-700">Xóa</button>
             </div>
           </div>
         </div>
@@ -449,28 +447,28 @@ function EventCard({ ev, onEdit, onDelete, onToggleNotify, highlight }: {
   const styles = { red: 'border-red-200 bg-red-50', orange: 'border-orange-200 bg-orange-50', none: 'border-gray-100 bg-white hover:bg-gray-50' };
   const dots = { red: 'bg-red-400', orange: 'bg-orange-400', none: 'bg-gray-300' };
   return (
-    <div className={`border rounded-xl p-3.5 transition-colors ${styles[highlight]}`}>
-      <div className="flex items-center gap-3">
-        <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dots[highlight]}`}></div>
+    <div className={`border rounded-lg p-2.5 transition-colors ${styles[highlight]}`}>
+      <div className="flex items-center gap-2">
+        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dots[highlight]}`}></div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-gray-900 text-sm truncate">{ev.name}</p>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+          <p className="font-bold text-gray-900 text-xs truncate">{ev.name}</p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0 mt-0.5">
             {ev.solarDate && <span className="text-[10px] text-gray-500">☀️ {new Date(ev.solarDate).toLocaleDateString('vi-VN')}</span>}
             {ev.lunarDay && ev.lunarMonth && <span className="text-[10px] text-gray-500">🌙 {ev.lunarDay} tháng {ev.lunarMonthName}</span>}
             <span className="text-[10px] text-gray-400">{ev.repeat === 'yearly' ? '🔄 Hàng năm' : '1️⃣ Một lần'}</span>
           </div>
           {ev.note && <p className="text-[10px] text-gray-400 italic mt-0.5 line-clamp-1">{ev.note}</p>}
         </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-0.5 flex-shrink-0">
           <button onClick={() => onToggleNotify(ev)}
-            className={`p-1.5 rounded-lg transition-colors ${ev.notifyEnabled ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : 'text-gray-300 hover:bg-gray-100'}`}>
-            {ev.notifyEnabled ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+            className={`p-1 rounded-md transition-colors ${ev.notifyEnabled ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : 'text-gray-300 hover:bg-gray-100'}`}>
+            {ev.notifyEnabled ? <Bell className="h-3 w-3" /> : <BellOff className="h-3 w-3" />}
           </button>
-          <button onClick={() => onEdit(ev)} className="p-1.5 rounded-lg text-gray-300 hover:text-[#b48a28] hover:bg-amber-50 transition-colors">
-            <Edit2 className="h-3.5 w-3.5" />
+          <button onClick={() => onEdit(ev)} className="p-1 rounded-md text-gray-300 hover:text-[#b48a28] hover:bg-amber-50 transition-colors">
+            <Edit2 className="h-3 w-3" />
           </button>
-          <button onClick={() => onDelete(ev.id)} className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors">
-            <Trash2 className="h-3.5 w-3.5" />
+          <button onClick={() => onDelete(ev.id)} className="p-1 rounded-md text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors">
+            <Trash2 className="h-3 w-3" />
           </button>
         </div>
       </div>
