@@ -694,6 +694,36 @@ export default function App() {
           />
           <div className="absolute inset-0 bg-black/40"></div>
 
+          {/* Đồng hồ + lịch trên ảnh bìa - góc trái dưới */}
+          <div className="absolute bottom-2 left-3 z-10 flex items-end gap-3">
+            {/* Giờ lớn */}
+            <div className="flex flex-col items-start">
+              <span className="text-white font-black tabular-nums leading-none drop-shadow-lg"
+                style={{ fontSize: 'clamp(22px, 4vw, 32px)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+                {timeStr}
+              </span>
+            </div>
+            {/* Đường dọc ngăn cách */}
+            <div className="w-px h-8 bg-white/30 self-center"></div>
+            {/* Lịch dương + âm */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">☀️</span>
+                <span className="text-white text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  {solarStr}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">🌙</span>
+                <span className="text-yellow-200 text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  Âm lịch: {lunarStr}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="absolute top-2 right-2 opacity-0 group-hover/cover:opacity-100 transition-opacity z-10">
             <button
               onClick={() => coverInputRef.current?.click()}
@@ -814,23 +844,6 @@ export default function App() {
                   {isDownloading ? 'Đang xuất...' : 'PDF'}
                 </button>
               )}
-
-              {/* Đồng hồ + Lịch dương + Lịch âm */}
-              <div className="hidden sm:flex flex-col items-center justify-center bg-black/20 rounded px-3 py-1 border border-white/10 min-w-[160px]">
-                <div className="flex items-center gap-2 w-full justify-between">
-                  <span className="text-white font-black text-sm tracking-widest tabular-nums">{timeStr}</span>
-                  <span className="text-yellow-300 text-[9px] font-bold uppercase tracking-wide">🕐</span>
-                </div>
-                <div className="w-full border-t border-white/10 my-0.5"></div>
-                <div className="text-white/90 text-[9px] font-semibold w-full">☀️ {solarStr}</div>
-                <div className="text-yellow-200 text-[9px] font-semibold w-full">🌙 Âm: {lunarStr}</div>
-              </div>
-
-              {/* Mobile: chỉ hiện giờ + ngày */}
-              <div className="flex sm:hidden flex-col items-center bg-black/20 rounded px-2 py-0.5 border border-white/10">
-                <span className="text-white font-black text-xs tabular-nums">{timeStr}</span>
-                <span className="text-white/70 text-[8px]">{now.getDate()}/{now.getMonth()+1}/{now.getFullYear()}</span>
-              </div>
 
               <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/50" />
@@ -1451,42 +1464,60 @@ export default function App() {
 
       {/* Popup thông báo sự kiện sắp tới */}
       {upcomingPopup.length > 0 && !popupDismissed && (
-        <div className="fixed bottom-4 right-4 z-50 max-w-sm w-full">
+        <div className="fixed bottom-5 right-5 z-50 w-80 sm:w-96">
           <div className="bg-white rounded-2xl shadow-2xl border border-amber-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-500 to-[#b48a28] px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-white animate-bounce" />
-                <span className="text-white font-bold text-sm">Sự kiện sắp tới!</span>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-[#b48a28] px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bell className="h-5 w-5 text-white animate-bounce" />
+                </div>
+                <div>
+                  <p className="text-white font-black text-base leading-tight">Sự kiện sắp tới!</p>
+                  <p className="text-white/75 text-[11px] mt-0.5">{upcomingPopup.length} sự kiện cần chú ý</p>
+                </div>
               </div>
-              <button onClick={() => setPopupDismissed(true)} className="text-white/80 hover:text-white">
-                <X className="h-4 w-4" />
+              <button
+                onClick={() => setPopupDismissed(true)}
+                className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="h-3.5 w-3.5 text-white" />
               </button>
             </div>
-            <div className="p-3 space-y-2 max-h-60 overflow-y-auto">
+
+            {/* Danh sách sự kiện */}
+            <div className="px-4 py-3 space-y-2 max-h-52 overflow-y-auto">
               {upcomingPopup.map(ev => (
-                <div key={ev.id} className="flex items-start gap-2 p-2 bg-amber-50 rounded-xl border border-amber-100">
-                  <PartyPopper className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-bold text-gray-900 text-xs">{ev.name}</p>
-                    <div className="flex gap-2 mt-0.5">
+                <div key={ev.id} className="flex items-center gap-3 p-2.5 bg-amber-50 rounded-xl border border-amber-100">
+                  <div className="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <PartyPopper className="h-3.5 w-3.5 text-amber-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-sm truncate">{ev.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       {ev.solarDate && (
-                        <span className="text-[10px] text-gray-500">☀️ {new Date(ev.solarDate).toLocaleDateString('vi-VN')}</span>
+                        <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                          ☀️ {new Date(ev.solarDate).toLocaleDateString('vi-VN')}
+                        </span>
                       )}
                       {ev.lunarDay && ev.lunarMonth && (
-                        <span className="text-[10px] text-gray-500">🌙 {ev.lunarDay}/{ev.lunarMonth}</span>
+                        <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                          🌙 {ev.lunarDay}/{ev.lunarMonth} âm
+                        </span>
                       )}
                     </div>
-                    {ev.note && <p className="text-[10px] text-gray-400 italic mt-0.5">{ev.note}</p>}
                   </div>
                 </div>
               ))}
             </div>
-            <div className="px-3 pb-3">
+
+            {/* Footer button */}
+            <div className="px-4 pb-4 pt-1">
               <button
                 onClick={() => { setPopupDismissed(true); setIsEventsModalOpen(true); }}
-                className="w-full bg-[#b48a28] text-white py-2 rounded-xl text-xs font-bold hover:bg-[#9a7522] transition-colors"
+                className="w-full bg-[#b48a28] text-white py-2.5 rounded-xl text-sm font-bold hover:bg-[#9a7522] transition-colors shadow-md"
               >
-                Xem tất cả sự kiện
+                Xem tất cả sự kiện →
               </button>
             </div>
           </div>
