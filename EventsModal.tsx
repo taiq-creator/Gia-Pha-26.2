@@ -487,6 +487,7 @@ export default function EventsModal({ treeId, treeName, onClose }: EventsModalPr
 
 // Card hiển thị 1 sự kiện
 function EventCard({ ev, onEdit, onDelete, onToggleNotify, highlight }: {
+  key?: any;
   ev: FamilyEvent;
   onEdit: (ev: FamilyEvent) => void;
   onDelete: (id: string) => void;

@@ -126,39 +126,6 @@ export default function App() {
   const [upcomingPopup, setUpcomingPopup] = useState<FamilyEvent[]>([]);
   const [popupDismissed, setPopupDismissed] = useState(false);
 
-  // Kiểm tra sự kiện sắp tới khi load xong data
-  useEffect(() => {
-    if (familyTrees.length === 0 || popupDismissed) return;
-    const checkEvents = async () => {
-      const { data } = await supabase.from('giapha_events').select('*');
-      if (!data || data.length === 0) return;
-      const allEvents: FamilyEvent[] = data.map((r: any) => ({
-        id: r.id, treeId: r.tree_id, name: r.name, solarDate: r.solar_date,
-        lunarDay: r.lunar_day, lunarMonth: r.lunar_month, lunarMonthName: '',
-        notifyEnabled: r.notify_enabled, repeat: r.repeat_yearly ? 'yearly' : 'once',
-        note: r.note, createdAt: r.created_at,
-      }));
-      const upcoming = checkUpcomingEvents(allEvents, new Date());
-      if (upcoming.length > 0) {
-        setUpcomingPopup(upcoming);
-        // Xin quyền và gửi browser notification
-        if ('Notification' in window) {
-          const permission = await Notification.requestPermission();
-          if (permission === 'granted') {
-            upcoming.forEach(ev => {
-              const solarDate = ev.solarDate ? new Date(ev.solarDate).toLocaleDateString('vi-VN') : '';
-              new Notification(`🔔 Sự kiện sắp tới: ${ev.name}`, {
-                body: `${solarDate}${ev.lunarDay ? ` | Âm: ${ev.lunarDay}/${ev.lunarMonth}` : ''}`,
-                icon: '/favicon.ico',
-              });
-            });
-          }
-        }
-      }
-    };
-    checkEvents();
-  }, [familyTrees, popupDismissed]);
-
   // --- ĐỒNG HỒ + LỊCH ÂM THỰC ---
   const [now, setNow] = useState(new Date());
   useEffect(() => {
@@ -275,6 +242,38 @@ export default function App() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+
+  // Kiểm tra sự kiện sắp tới khi load xong data - đặt sau familyTrees
+  useEffect(() => {
+    if (familyTrees.length === 0 || popupDismissed) return;
+    const checkEvents = async () => {
+      const { data } = await supabase.from('giapha_events').select('*');
+      if (!data || data.length === 0) return;
+      const allEvents: FamilyEvent[] = data.map((r: any) => ({
+        id: r.id, treeId: r.tree_id, name: r.name, solarDate: r.solar_date,
+        lunarDay: r.lunar_day, lunarMonth: r.lunar_month, lunarMonthName: '',
+        notifyEnabled: r.notify_enabled, repeat: r.repeat_yearly ? 'yearly' : 'once',
+        note: r.note, createdAt: r.created_at,
+      }));
+      const upcoming = checkUpcomingEvents(allEvents, new Date());
+      if (upcoming.length > 0) {
+        setUpcomingPopup(upcoming);
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            upcoming.forEach(ev => {
+              const solarDate = ev.solarDate ? new Date(ev.solarDate).toLocaleDateString('vi-VN') : '';
+              new Notification(`🔔 Sự kiện sắp tới: ${ev.name}`, {
+                body: `${solarDate}${ev.lunarDay ? ` | Âm: ${ev.lunarDay}/${ev.lunarMonth}` : ''}`,
+                icon: '/favicon.ico',
+              });
+            });
+          }
+        }
+      }
+    };
+    checkEvents();
+  }, [familyTrees, popupDismissed]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
