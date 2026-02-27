@@ -86,7 +86,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
+    <div className="bg-[#0a192f] flex items-center justify-center p-4" style={{ minHeight: '100dvh' }}>
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5" style={{
         backgroundImage: `repeating-linear-gradient(45deg, #b48a28 0, #b48a28 1px, transparent 0, transparent 50%)`,

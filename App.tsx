@@ -729,7 +729,7 @@ export default function App() {
   };
 
   if (authLoading) return (
-    <div className="h-screen flex items-center justify-center bg-[#0a192f]">
+    <div style={{ height: '100dvh' }} className="flex items-center justify-center bg-[#0a192f]">
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-[#b48a28] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="font-bold text-[#b48a28] text-sm tracking-widest uppercase">Đang tải...</p>
@@ -740,7 +740,7 @@ export default function App() {
   if (!session) return <AuthPage />;
 
   if (isLoading) return (
-    <div className="h-screen flex items-center justify-center bg-[#fdf8f6]">
+    <div style={{ height: '100dvh' }} className="flex items-center justify-center bg-[#fdf8f6]">
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-[#b48a28] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="font-bold text-[#b48a28] text-sm tracking-widest uppercase">Đang đồng bộ dữ liệu...</p>
@@ -749,7 +749,7 @@ export default function App() {
   );
 
   return (
-    <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-16">
+    <div className="flex flex-col font-sans bg-gray-100 overflow-hidden pb-16 sm:pb-0" style={{ height: '100dvh', maxHeight: '100dvh' }}>
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
         <div className="h-28 sm:h-36 w-full relative overflow-hidden">
