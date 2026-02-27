@@ -487,12 +487,15 @@ export default function App() {
     try {
       setIsDownloading(true);
 
-      // Tạo div ẩn bên ngoài viewport để render toàn bộ sơ đồ
+      // Tạo div render ở góc trái trên — opacity 0 để ẩn nhưng vẫn được render
       const printDiv = document.createElement('div');
       printDiv.style.cssText = `
         position: fixed;
-        top: -99999px;
-        left: -99999px;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        pointer-events: none;
+        z-index: -1;
         background: #fff9f0;
         padding: 40px;
         display: inline-flex;
@@ -500,9 +503,10 @@ export default function App() {
         align-items: center;
         font-family: Inter, sans-serif;
         min-width: 800px;
+        overflow: visible;
       `;
 
-      // Clone nội dung sơ đồ (không có transform pan/zoom)
+      // Clone nội dung sơ đồ (bỏ transform pan/zoom)
       if (treeContainerRef.current) {
         const clone = treeContainerRef.current.cloneNode(true) as HTMLElement;
         clone.style.cssText = `
@@ -512,6 +516,7 @@ export default function App() {
           flex-direction: column;
           align-items: center;
           padding: 20px;
+          overflow: visible;
         `;
         printDiv.appendChild(clone);
       }
@@ -519,7 +524,10 @@ export default function App() {
       document.body.appendChild(printDiv);
 
       // Đợi render xong
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 500));
+
+      const W = printDiv.scrollWidth || 800;
+      const H = printDiv.scrollHeight || 600;
 
       const canvas = await html2canvas(printDiv, {
         scale: 2,
@@ -529,21 +537,30 @@ export default function App() {
         allowTaint: true,
         scrollX: 0,
         scrollY: 0,
-        width: printDiv.scrollWidth,
-        height: printDiv.scrollHeight,
-        windowWidth: printDiv.scrollWidth,
-        windowHeight: printDiv.scrollHeight,
+        x: 0,
+        y: 0,
+        width: W,
+        height: H,
+        windowWidth: W,
+        windowHeight: H,
       });
 
       document.body.removeChild(printDiv);
 
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas rỗng');
+      }
+
       const imgData = canvas.toDataURL('image/png');
+      const pdfW = canvas.width / 2;
+      const pdfH = canvas.height / 2;
       const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        orientation: pdfW > pdfH ? 'landscape' : 'portrait',
         unit: 'px',
-        format: [canvas.width / 2, canvas.height / 2]
+        format: [pdfW, pdfH],
+        hotfixes: ['px_scaling'],
       });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save(`${currentTree.name || 'gia-pha'}.pdf`);
     } catch (err) {
       console.error('PDF error:', err);
