@@ -141,34 +141,42 @@ export default function App() {
   }, []);
 
   const getLunarDate = (date: Date): string => {
-    // Thuật toán chuyển đổi âm lịch
-    const jd = Math.floor((date.getTime()) / 86400000) + 2440588;
-    const l = jd + 68569;
-    const n = Math.floor(4 * l / 146097);
-    const ll = l - Math.floor((146097 * n + 3) / 4);
-    const i = Math.floor(4000 * (ll + 1) / 1461001);
-    const lll = ll - Math.floor(1461 * i / 4) + 31;
-    const j = Math.floor(80 * lll / 2447);
-    const dd = lll - Math.floor(2447 * j / 80);
-    const lv = Math.floor(j / 11);
-    const mm = j + 2 - 12 * lv;
-    const yy = 100 * (n - 49) + i + lv;
-
-    // Tính ngày âm lịch từ Julian Day
-    const lunarMonthNames = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
-    
-    // Dùng công thức đơn giản hóa
-    const sunLong = getSunLongitude(jd);
+    const LUNAR_MONTH_NAMES = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
+    const tz = 7;
+    // Chuyển Date sang Julian Day (UTC+7)
+    const jd = Math.floor((date.getTime() / 86400000)) + 2440587;
+    // Tìm ngày trăng mới gần nhất
     const k = Math.floor((jd - 2415021.076998695) / 29.530588853);
-    let monthStart = getNewMoonDay(k, 7);
-    if (monthStart > jd) monthStart = getNewMoonDay(k - 1, 7);
-    const lunarDay = jd - monthStart + 1;
-    
-    const lunarMonthRaw = Math.floor(sunLong / 30);
-    const lunarMonth = lunarMonthRaw < 0 ? 0 : lunarMonthRaw > 11 ? 11 : lunarMonthRaw;
-
-    return `${lunarDay} tháng ${lunarMonthNames[mm - 1] || mm}`;
+    let ms = getNewMoonDay(k + 1, tz);
+    if (ms > jd) ms = getNewMoonDay(k, tz);
+    const lunarDay = jd - ms + 1;
+    // Tháng 11 âm lịch của năm hiện tại (tháng có Đông Chí)
+    const y = date.getFullYear();
+    const a11 = getLunarMonth11(y, tz);
+    const b11 = a11 < ms ? getLunarMonth11(y + 1, tz) : a11;
+    const isLeapYear = (b11 - a11) > 365;
+    const diff = Math.floor((ms - a11) / 29);
+    let lunarMonth = diff + 11;
+    if (isLeapYear && diff >= Math.floor((ms - a11) / 29)) lunarMonth--;
+    if (lunarMonth > 12) lunarMonth -= 12;
+    if (lunarMonth < 1) lunarMonth += 12;
+    return `${lunarDay} tháng ${LUNAR_MONTH_NAMES[lunarMonth - 1]}`;
   };
+
+  function getLunarMonth11(y: number, tz: number): number {
+    const off = jdFromDate(31, 12, y) - 2415021.076998695;
+    const k = Math.floor(off / 29.530588853);
+    let nm = getNewMoonDay(k, tz);
+    if (getSunLongitude(nm, tz) >= 9) nm = getNewMoonDay(k - 1, tz);
+    return nm;
+  }
+
+  function jdFromDate(d: number, m: number, y: number): number {
+    const a = Math.floor((14 - m) / 12);
+    const yy = y + 4800 - a;
+    const mm = m + 12 * a - 3;
+    return d + Math.floor((153 * mm + 2) / 5) + 365 * yy + Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+  }
 
   function getNewMoonDay(k: number, timeZone: number): number {
     const T = k / 1236.85;
@@ -188,10 +196,10 @@ export default function App() {
     return Math.floor(Jd + C1 - deltat + 0.5 + timeZone / 24);
   }
 
-  function getSunLongitude(jdn: number): number {
-    const T = (jdn - 2451545.0) / 36525;
+  function getSunLongitude(jdn: number, tz: number = 7): number {
+    const T = (jdn - 2451545.5 - tz / 24) / 36525;
     const T2 = T * T;
-    let dr = Math.PI / 180;
+    const dr = Math.PI / 180;
     let M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
     let L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
     let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
@@ -692,98 +700,89 @@ export default function App() {
     <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-16">
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
-        <div className="h-28 sm:h-36 w-full relative overflow-hidden">
+        <div className="h-24 sm:h-32 w-full relative overflow-hidden">
           <img
             src={currentTree.coverImage || "https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=2000&auto=format&fit=crop"}
             alt="Cover"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
 
-          {/* Layout dọc: tên bìa trên, đồng hồ dưới — không đè nhau */}
-          <div className="absolute inset-0 flex flex-col justify-between py-2 px-3">
-
-            {/* TRÊN: Tên bìa căn giữa */}
-            <div className="flex items-start justify-center pt-1">
-              {isEditingCoverText ? (
-                <div className="flex items-center gap-2 bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
-                  <input
-                    type="text"
-                    value={tempCoverText}
-                    onChange={(e) => setTempCoverText(e.target.value)}
-                    className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-base sm:text-2xl font-serif font-bold tracking-widest uppercase text-center w-48 sm:w-64"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSaveCoverText();
-                      if (e.key === 'Escape') setIsEditingCoverText(false);
-                    }}
-                  />
-                  <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-4 w-4" /></button>
-                  <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-4 w-4" /></button>
-                </div>
-              ) : (
-                <div className="group/text relative flex items-center">
-                  <h1
-                    className="text-lg sm:text-3xl font-serif font-bold text-white tracking-widest uppercase text-center leading-tight"
-                    style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}
-                  >
-                    {currentTree.coverText || currentTree.name}
-                  </h1>
-                  <button
-                    onClick={() => {
-                      setTempCoverText(currentTree.coverText || currentTree.name);
-                      setIsEditingCoverText(true);
-                    }}
-                    className="absolute -right-6 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
-                  >
-                    <Edit2 className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
+          {/* Đồng hồ + lịch trên ảnh bìa - góc trái dưới */}
+          <div className="absolute bottom-2 left-3 z-10 flex items-end gap-3">
+            {/* Giờ lớn */}
+            <div className="flex flex-col items-start">
+              <span className="text-white font-black tabular-nums leading-none drop-shadow-lg"
+                style={{ fontSize: 'clamp(22px, 4vw, 32px)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+                {timeStr}
+              </span>
             </div>
-
-            {/* DƯỚI: Đồng hồ + lịch bên trái, nút đổi ảnh bên phải */}
-            <div className="flex items-end justify-between">
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-white font-black tabular-nums text-sm sm:text-lg leading-none"
-                  style={{ textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}
-                >
-                  {timeStr}
+            {/* Đường dọc ngăn cách */}
+            <div className="w-px h-8 bg-white/30 self-center"></div>
+            {/* Lịch dương + âm */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">☀️</span>
+                <span className="text-white text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  {solarStr}
                 </span>
-                <div className="w-px h-5 bg-white/30 self-center"></div>
-                <div className="flex flex-col gap-0">
-                  <div className="flex items-center gap-0.5">
-                    <span className="text-[9px]">☀️</span>
-                    <span className="text-white text-[10px] font-semibold leading-tight"
-                      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
-                      {solarStr}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-0.5">
-                    <span className="text-[9px]">🌙</span>
-                    <span className="text-yellow-200 text-[10px] font-semibold leading-tight"
-                      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
-                      Âm lịch: {lunarStr}
-                    </span>
-                  </div>
-                </div>
               </div>
-
-              {/* Nút đổi ảnh bìa */}
-              <div className="opacity-0 group-hover/cover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => coverInputRef.current?.click()}
-                  className="bg-black/50 hover:bg-black/70 text-white rounded p-1 text-[10px] flex items-center gap-1 backdrop-blur-sm transition-colors"
-                >
-                  <Edit2 className="h-2.5 w-2.5" />
-                  <span className="hidden sm:inline">Đổi ảnh</span>
-                </button>
-                <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">🌙</span>
+                <span className="text-yellow-200 text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  Âm lịch: {lunarStr}
+                </span>
               </div>
             </div>
+          </div>
 
+          <div className="absolute top-2 right-2 opacity-0 group-hover/cover:opacity-100 transition-opacity z-10">
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              className="bg-black/50 hover:bg-black/70 text-white rounded p-1.5 text-xs flex items-center gap-1 backdrop-blur-sm transition-colors cursor-pointer"
+            >
+              <Edit2 className="h-3 w-3" />
+              <span className="hidden sm:inline">Đổi ảnh bìa</span>
+            </button>
+            <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
+          </div>
+
+          <div className="absolute inset-0 flex items-center justify-center">
+            {isEditingCoverText ? (
+              <div className="flex items-center gap-2 bg-black/50 p-2 rounded backdrop-blur-sm">
+                <input
+                  type="text"
+                  value={tempCoverText}
+                  onChange={(e) => setTempCoverText(e.target.value)}
+                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-xl sm:text-3xl font-serif font-bold tracking-widest uppercase text-center w-64"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveCoverText();
+                    if (e.key === 'Escape') setIsEditingCoverText(false);
+                  }}
+                />
+                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-5 w-5" /></button>
+                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-5 w-5" /></button>
+              </div>
+            ) : (
+              <div className="group/text relative flex items-center">
+                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-widest uppercase drop-shadow-lg text-center px-4">
+                  {currentTree.coverText || currentTree.name}
+                </h1>
+                <button
+                  onClick={() => {
+                    setTempCoverText(currentTree.coverText || currentTree.name);
+                    setIsEditingCoverText(true);
+                  }}
+                  className="absolute -right-8 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
