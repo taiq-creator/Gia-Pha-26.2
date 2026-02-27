@@ -689,7 +689,7 @@ export default function App() {
   );
 
   return (
-    <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-20">
+    <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-16">
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
         <div className="h-24 sm:h-32 w-full relative overflow-hidden">
@@ -1488,80 +1488,76 @@ export default function App() {
       )}
 
       {/* ===== FOOTER CỐ ĐỊNH ===== */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] shadow-[0_-4px_20px_rgba(0,0,0,0.25)]">
-        {/* Nút Thêm TV nổi lên giữa */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-50">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] shadow-[0_-4px_24px_rgba(0,0,0,0.3)]">
+        {/* Nút Thêm TV nổi lên giữa — tách khỏi flow */}
+        <div className="absolute left-1/2 -translate-x-1/2 -top-7 z-50 flex flex-col items-center">
           <button
             onClick={() => handleOpenForm()}
-            className="flex flex-col items-center gap-1 group"
+            className="active:scale-95 transition-transform"
           >
-            <div className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-4 border-[#b48a28] group-active:scale-95 transition-transform">
-              <UserPlus className="h-7 w-7 text-[#b48a28]" />
+            <div className="w-[60px] h-[60px] bg-white rounded-full shadow-2xl flex items-center justify-center"
+              style={{ border: '3px solid #c9a040' }}>
+              <UserPlus className="h-6 w-6 text-[#b48a28]" />
             </div>
-            <span className="text-white text-[10px] font-bold drop-shadow" style={{marginTop: 2}}>Thêm TV</span>
           </button>
+          <span className="text-white font-bold text-[10px] mt-1 drop-shadow">Thêm TV</span>
         </div>
 
-        {/* Các nút còn lại */}
-        <div className="flex items-end justify-between px-4 pt-2 pb-3">
-
-          {/* TRÁI: Chọn gia phả */}
-          <div className="flex flex-col items-center gap-1 w-24">
-            <div className="w-10 h-10 bg-white/10 rounded-2xl flex flex-col items-center justify-center px-1 py-1 w-full border border-white/20">
-              <select
-                value={currentTreeId}
-                onChange={(e) => setCurrentTreeId(e.target.value)}
-                className="bg-transparent text-white text-[10px] font-bold border-none outline-none cursor-pointer text-center appearance-none w-full truncate leading-tight"
-              >
-                {familyTrees.map(tree => (
-                  <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
-                ))}
-              </select>
+        {/* 4 nút còn lại — chia đều 2 bên */}
+        <div className="flex items-center pb-4 pt-2 px-4">
+          {/* TRÁI */}
+          <div className="flex items-center gap-4 flex-1 justify-start">
+            {/* Gia phả dropdown */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="h-11 bg-white/15 rounded-full flex items-center justify-center border border-white/30 px-3 min-w-[76px]">
+                <select
+                  value={currentTreeId}
+                  onChange={(e) => setCurrentTreeId(e.target.value)}
+                  className="bg-transparent text-white text-[10px] font-bold border-none outline-none cursor-pointer text-center appearance-none w-full truncate"
+                >
+                  {familyTrees.map(tree => (
+                    <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-white/70 text-[9px] font-medium">Gia Phả</span>
             </div>
-            <span className="text-white/70 text-[9px]">Gia Phả</span>
+
+            {/* Tạo mới */}
+            <button onClick={() => setIsNewTreeModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
+              <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center">
+                <Plus className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-white/70 text-[9px] font-medium">Tạo mới</span>
+            </button>
           </div>
 
-          {/* TRÁI 2: Tạo mới */}
-          <button
-            onClick={() => setIsNewTreeModalOpen(true)}
-            className="flex flex-col items-center gap-1 group"
-          >
-            <div className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors group-active:scale-95">
-              <Plus className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-white/70 text-[9px]">Tạo mới</span>
-          </button>
-
           {/* GIỮA: khoảng trống cho nút nổi */}
-          <div className="w-16" />
+          <div className="w-16 flex-shrink-0" />
 
-          {/* PHẢI 1: Xóa */}
-          <button
-            onClick={() => setTreeToDelete(currentTreeId)}
-            className="flex flex-col items-center gap-1 group"
-          >
-            <div className="w-10 h-10 bg-red-500/70 hover:bg-red-500/90 rounded-full flex items-center justify-center transition-colors group-active:scale-95">
-              <Trash2 className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-white/70 text-[9px]">Xóa</span>
-          </button>
+          {/* PHẢI */}
+          <div className="flex items-center gap-4 flex-1 justify-end">
+            {/* Xóa */}
+            <button onClick={() => setTreeToDelete(currentTreeId)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
+              <div className="w-11 h-11 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                <Trash2 className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-white/70 text-[9px] font-medium">Xóa</span>
+            </button>
 
-          {/* PHẢI 2: Sự kiện */}
-          <button
-            onClick={() => setIsEventsModalOpen(true)}
-            className="flex flex-col items-center gap-1 group relative"
-          >
-            <div className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors group-active:scale-95 relative">
-              <Bell className="h-5 w-5 text-white" />
-              {upcomingPopup.length > 0 && !popupDismissed && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow">
-                  {upcomingPopup.length}
-                </span>
-              )}
-            </div>
-            <span className="text-white/70 text-[9px]">Sự Kiện</span>
-          </button>
-
+            {/* Sự kiện */}
+            <button onClick={() => setIsEventsModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform relative">
+              <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center relative">
+                <Bell className="h-5 w-5 text-white" />
+                {upcomingPopup.length > 0 && !popupDismissed && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow">
+                    {upcomingPopup.length}
+                  </span>
+                )}
+              </div>
+              <span className="text-white/70 text-[9px] font-medium">Sự Kiện</span>
+            </button>
+          </div>
         </div>
       </div>
       {/* ===== END FOOTER ===== */}
