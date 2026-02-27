@@ -87,11 +87,18 @@ const FamilyTreeNode = React.memo(({ node, onOpenDetail }: { node: FamilyNodeDat
       {/* Con cái */}
       {hasChildren && (
         <div className={`tree-children ${singleChild ? 'single-child' : ''}`}>
-          {node.children.map(child => (
-            <div key={child.mainMember.id} className={`tree-node ${singleChild ? 'only-child' : ''}`}>
-              <FamilyTreeNode node={child} onOpenDetail={onOpenDetail} />
-            </div>
-          ))}
+          {node.children.map((child, idx) => {
+            const isFirst = idx === 0;
+            const isLast = idx === node.children.length - 1;
+            return (
+              <div
+                key={child.mainMember.id}
+                className={`tree-node ${singleChild ? 'only-child' : ''} ${isFirst ? 'first-child' : ''} ${isLast ? 'last-child' : ''}`}
+              >
+                <FamilyTreeNode node={child} onOpenDetail={onOpenDetail} />
+              </div>
+            );
+          })}
         </div>
       )}
     </li>

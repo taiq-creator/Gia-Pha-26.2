@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
@@ -21,59 +20,9 @@ body {
   color: var(--color-brown-900);
 }
 
-/* ========================= */
-/* FAMILY TREE CSS CŨ        */
-/* ========================= */
-.family-tree ul {
-  padding-top: 10px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-.family-tree li {
-  text-align: center;
-  list-style-type: none;
-  position: relative;
-  padding: 10px 4px 0 4px;
-}
-.family-tree li::before, .family-tree li::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 50%;
-  border-top: 1px solid #94a3b8;
-  width: 50%;
-  height: 10px;
-}
-.family-tree li::after {
-  right: auto;
-  left: 50%;
-  border-left: 1px solid #94a3b8;
-}
-.family-tree li:only-child::after,
-.family-tree li:only-child::before { display: none; }
-.family-tree li:only-child { padding-top: 0; }
-.family-tree li:first-child::before,
-.family-tree li:last-child::after { border: 0 none; }
-.family-tree li:last-child::before {
-  border-right: 1px solid #94a3b8;
-  border-radius: 0 3px 0 0;
-}
-.family-tree li:first-child::after { border-radius: 3px 0 0 0; }
-.family-tree ul ul::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  border-left: 1px solid #94a3b8;
-  width: 0;
-  height: 10px;
-  transform: translateX(-50%);
-}
-
-/* ========================= */
-/* FAMILY TREE CSS MỚI ĐẸP   */
-/* ========================= */
+/* ======================================= */
+/*  FAMILY TREE — đường kết nối chuẩn      */
+/* ======================================= */
 
 .family-tree-new {
   list-style: none;
@@ -82,7 +31,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 20px;
 }
 
 .family-tree-new li {
@@ -93,64 +41,76 @@ body {
   position: relative;
 }
 
-/* Đường dọc từ card xuống nhánh con */
-.family-tree-new li > .tree-children {
-  position: relative;
+/* ── Wrapper nhóm con ── */
+.tree-children {
   display: flex;
-  gap: 20px;
-  padding-top: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  padding-top: 28px;
+  gap: 8px;
 }
 
-/* Đường dọc chính từ cha xuống */
-.family-tree-new li > .tree-children::before {
+/* Đường dọc từ card cha xuống đường ngang */
+.tree-children::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 2px;
-  height: 24px;
+  height: 28px;
   background: #3b82f6;
 }
 
-/* Đường ngang nối tất cả con */
-.family-tree-new li > .tree-children::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: calc(48px);
-  right: calc(48px);
-  height: 2px;
-  background: #3b82f6;
-}
-
-/* Chỉ 1 con: ẩn đường ngang */
-.family-tree-new li > .tree-children.single-child::after {
-  display: none;
-}
-
-/* Mỗi node con */
-.family-tree-new .tree-node {
+/* ── Mỗi node con ── */
+.tree-node {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  padding-top: 22px;
+  padding-top: 20px;
 }
 
-/* Đường dọc từ ngang xuống mỗi con */
-.family-tree-new .tree-node::before {
+/* Đường dọc từ đường ngang xuống card */
+.tree-node::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 2px;
-  height: 22px;
+  height: 20px;
   background: #3b82f6;
 }
 
-/* Node duy nhất không cần đường ngang, chỉ cần đường thẳng */
-.family-tree-new .tree-node.only-child::before {
-  height: 24px;
+/* Đường ngang nối các anh em — vẽ bằng ::after mỗi node */
+.tree-node:not(.only-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
+}
+
+/* Con đầu tiên: chỉ vẽ nửa phải */
+.tree-node.first-child:not(.only-child)::after {
+  left: 50%;
+  right: 0;
+}
+
+/* Con cuối cùng: chỉ vẽ nửa trái */
+.tree-node.last-child:not(.only-child)::after {
+  left: 0;
+  right: 50%;
+}
+
+/* Con duy nhất: không cần đường ngang */
+.tree-node.only-child {
+  padding-top: 0;
+}
+.tree-node.only-child::before {
+  display: none;
 }
