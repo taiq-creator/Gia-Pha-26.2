@@ -1,9 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  
   --color-brown-50: #fdf8f6;
   --color-brown-100: #f2e8e5;
   --color-brown-200: #eaddd7;
@@ -16,92 +14,106 @@
   --color-brown-900: #423028;
 }
 
-/* ===== MOBILE FULL SCREEN FIX ===== */
-html, body {
-  height: 100%;
-  height: 100dvh;
-  width: 100%;
-  overflow: hidden;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
 body {
   background-color: var(--color-brown-50);
   color: var(--color-brown-900);
-  /* Ngăn bounce scroll trên iOS */
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
 }
 
-#root {
-  height: 100%;
-  height: 100dvh;
-  width: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+/* ============================================ */
+/*  FAMILY TREE — đường kết nối chuẩn           */
+/* ============================================ */
 
-/* Family Tree CSS */
-.family-tree ul {
-  padding-top: 10px;
-  position: relative;
+.family-tree-new {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
-.family-tree li {
-  text-align: center;
-  list-style-type: none;
+.family-tree-new li {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
-  padding: 10px 4px 0 4px;
 }
 
-.family-tree li::before, .family-tree li::after {
+/* ── Wrapper nhóm các con ── */
+.tree-children {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  padding-top: 30px;
+  gap: 8px;
+}
+
+/* Đường dọc từ cha xuống (đi đến đường ngang) */
+.tree-children::before {
   content: '';
   position: absolute;
   top: 0;
-  right: 50%;
-  border-top: 1px solid var(--color-brown-400);
-  width: 50%;
-  height: 10px;
-}
-
-.family-tree li::after {
-  right: auto;
   left: 50%;
-  border-left: 1px solid var(--color-brown-400);
+  transform: translateX(-50%);
+  width: 2px;
+  height: 30px;
+  background: #3b82f6;
 }
 
-.family-tree li:only-child::after, .family-tree li:only-child::before {
-  display: none;
+/* ── Mỗi node con ── */
+.tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding-top: 22px;
 }
 
-.family-tree li:only-child {
+/* Đường dọc từ đường ngang xuống card con */
+.tree-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 22px;
+  background: #3b82f6;
+}
+
+/* Đường ngang — vẽ trên từng node, nối với nhau thành 1 đường liên tục */
+/* Mặc định: kéo full width (node ở giữa) */
+.tree-node:not(.only-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
+}
+
+/* Con đầu tiên: chỉ nửa phải */
+.tree-node.first-child:not(.only-child)::after {
+  left: 50%;
+  right: 0;
+}
+
+/* Con cuối cùng: chỉ nửa trái */
+.tree-node.last-child:not(.only-child)::after {
+  left: 0;
+  right: 50%;
+}
+
+/* Con duy nhất: không cần đường ngang, đường dọc thẳng từ cha */
+.tree-node.only-child {
   padding-top: 0;
 }
-
-.family-tree li:first-child::before, .family-tree li:last-child::after {
-  border: 0 none;
+.tree-node.only-child::before {
+  display: none;
 }
-
-.family-tree li:last-child::before {
-  border-right: 1px solid var(--color-brown-400);
-  border-radius: 0 3px 0 0;
-}
-
-.family-tree li:first-child::after {
-  border-radius: 3px 0 0 0;
-}
-
-.family-tree ul ul::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  border-left: 1px solid var(--color-brown-400);
-  width: 0;
-  height: 10px;
-  transform: translateX(-50%);
+.tree-node.only-child::after {
+  display: none;
 }
