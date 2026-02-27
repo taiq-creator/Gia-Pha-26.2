@@ -141,34 +141,42 @@ export default function App() {
   }, []);
 
   const getLunarDate = (date: Date): string => {
-    // Thuật toán chuyển đổi âm lịch
-    const jd = Math.floor((date.getTime()) / 86400000) + 2440588;
-    const l = jd + 68569;
-    const n = Math.floor(4 * l / 146097);
-    const ll = l - Math.floor((146097 * n + 3) / 4);
-    const i = Math.floor(4000 * (ll + 1) / 1461001);
-    const lll = ll - Math.floor(1461 * i / 4) + 31;
-    const j = Math.floor(80 * lll / 2447);
-    const dd = lll - Math.floor(2447 * j / 80);
-    const lv = Math.floor(j / 11);
-    const mm = j + 2 - 12 * lv;
-    const yy = 100 * (n - 49) + i + lv;
-
-    // Tính ngày âm lịch từ Julian Day
-    const lunarMonthNames = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
-    
-    // Dùng công thức đơn giản hóa
-    const sunLong = getSunLongitude(jd);
+    const LUNAR_MONTH_NAMES = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
+    const tz = 7;
+    // Chuyển Date sang Julian Day (UTC+7)
+    const jd = Math.floor((date.getTime() / 86400000)) + 2440587;
+    // Tìm ngày trăng mới gần nhất
     const k = Math.floor((jd - 2415021.076998695) / 29.530588853);
-    let monthStart = getNewMoonDay(k, 7);
-    if (monthStart > jd) monthStart = getNewMoonDay(k - 1, 7);
-    const lunarDay = jd - monthStart + 1;
-    
-    const lunarMonthRaw = Math.floor(sunLong / 30);
-    const lunarMonth = lunarMonthRaw < 0 ? 0 : lunarMonthRaw > 11 ? 11 : lunarMonthRaw;
-
-    return `${lunarDay} tháng ${lunarMonthNames[mm - 1] || mm}`;
+    let ms = getNewMoonDay(k + 1, tz);
+    if (ms > jd) ms = getNewMoonDay(k, tz);
+    const lunarDay = jd - ms + 1;
+    // Tháng 11 âm lịch của năm hiện tại (tháng có Đông Chí)
+    const y = date.getFullYear();
+    const a11 = getLunarMonth11(y, tz);
+    const b11 = a11 < ms ? getLunarMonth11(y + 1, tz) : a11;
+    const isLeapYear = (b11 - a11) > 365;
+    const diff = Math.floor((ms - a11) / 29);
+    let lunarMonth = diff + 11;
+    if (isLeapYear && diff >= Math.floor((ms - a11) / 29)) lunarMonth--;
+    if (lunarMonth > 12) lunarMonth -= 12;
+    if (lunarMonth < 1) lunarMonth += 12;
+    return `${lunarDay} tháng ${LUNAR_MONTH_NAMES[lunarMonth - 1]}`;
   };
+
+  function getLunarMonth11(y: number, tz: number): number {
+    const off = jdFromDate(31, 12, y) - 2415021.076998695;
+    const k = Math.floor(off / 29.530588853);
+    let nm = getNewMoonDay(k, tz);
+    if (getSunLongitude(nm, tz) >= 9) nm = getNewMoonDay(k - 1, tz);
+    return nm;
+  }
+
+  function jdFromDate(d: number, m: number, y: number): number {
+    const a = Math.floor((14 - m) / 12);
+    const yy = y + 4800 - a;
+    const mm = m + 12 * a - 3;
+    return d + Math.floor((153 * mm + 2) / 5) + 365 * yy + Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+  }
 
   function getNewMoonDay(k: number, timeZone: number): number {
     const T = k / 1236.85;
@@ -188,10 +196,10 @@ export default function App() {
     return Math.floor(Jd + C1 - deltat + 0.5 + timeZone / 24);
   }
 
-  function getSunLongitude(jdn: number): number {
-    const T = (jdn - 2451545.0) / 36525;
+  function getSunLongitude(jdn: number, tz: number = 7): number {
+    const T = (jdn - 2451545.5 - tz / 24) / 36525;
     const T2 = T * T;
-    let dr = Math.PI / 180;
+    const dr = Math.PI / 180;
     let M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
     let L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
     let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
@@ -1488,66 +1496,73 @@ export default function App() {
       )}
 
       {/* ===== FOOTER CỐ ĐỊNH ===== */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] shadow-[0_-4px_24px_rgba(0,0,0,0.25)]">
-        <div className="flex items-center gap-2 px-3 py-3 pb-5">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] border-t border-white/20 shadow-lg">
+        <div className="flex items-center justify-around px-2 py-1.5">
 
-          {/* TRÁI: Ô chọn gia phả — pill lớn */}
-          <div className="flex-1">
-            <div className="h-14 bg-white/15 border border-white/30 rounded-full flex items-center justify-center px-3">
-              <select
-                value={currentTreeId}
-                onChange={(e) => setCurrentTreeId(e.target.value)}
-                className="bg-transparent text-white text-[11px] font-bold border-none outline-none cursor-pointer text-center appearance-none w-full truncate"
-              >
-                {familyTrees.map(tree => (
-                  <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* GIỮA: 3 nút tròn */}
-          <div className="flex items-end gap-2">
-            {/* Tạo mới */}
-            <button onClick={() => setIsNewTreeModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <Plus className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-white/80 text-[9px] font-semibold">Tạo mới</span>
-            </button>
-
-            {/* Xóa */}
-            <button onClick={() => setTreeToDelete(currentTreeId)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
-              <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                <Trash2 className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-white/80 text-[9px] font-semibold">Xóa</span>
-            </button>
-
-            {/* Sự kiện */}
-            <button onClick={() => setIsEventsModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform relative">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center relative">
-                <Bell className="h-5 w-5 text-white" />
-                {upcomingPopup.length > 0 && !popupDismissed && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow">
-                    {upcomingPopup.length}
-                  </span>
-                )}
-              </div>
-              <span className="text-white/80 text-[9px] font-semibold">Sự Kiện</span>
-            </button>
-          </div>
-
-          {/* PHẢI: Nút Thêm thành viên — pill lớn */}
-          <div className="flex-1">
-            <button
-              onClick={() => handleOpenForm()}
-              className="w-full h-14 bg-white/15 border border-white/30 rounded-full flex items-center justify-center gap-2 active:bg-white/25 transition-colors"
+          {/* Chọn gia phả */}
+          <div className="flex flex-col items-center gap-0.5 flex-1">
+            <select
+              value={currentTreeId}
+              onChange={(e) => setCurrentTreeId(e.target.value)}
+              className="bg-transparent text-white text-[10px] font-bold border-none outline-none cursor-pointer text-center appearance-none max-w-[80px] truncate"
             >
-              <UserPlus className="h-5 w-5 text-white flex-shrink-0" />
-              <span className="text-white font-bold text-[11px] uppercase tracking-wide">Thêm Thành Viên</span>
-            </button>
+              {familyTrees.map(tree => (
+                <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
+              ))}
+            </select>
+            <span className="text-white/60 text-[8px]">Gia phả</span>
           </div>
+
+          {/* Tạo gia phả mới */}
+          <button
+            onClick={() => setIsNewTreeModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 flex-1 py-0.5"
+          >
+            <div className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+              <Plus className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-white/80 text-[8px]">Tạo mới</span>
+          </button>
+
+          {/* Xóa gia phả */}
+          {familyTrees.length > 1 && (
+            <button
+              onClick={() => setTreeToDelete(currentTreeId)}
+              className="flex flex-col items-center gap-0.5 flex-1 py-0.5"
+            >
+              <div className="w-7 h-7 bg-red-500/30 hover:bg-red-500/50 rounded-full flex items-center justify-center transition-colors">
+                <Trash2 className="h-4 w-4 text-red-200" />
+              </div>
+              <span className="text-white/80 text-[8px]">Xóa</span>
+            </button>
+          )}
+
+          {/* Thêm thành viên */}
+          <button
+            onClick={() => handleOpenForm()}
+            className="flex flex-col items-center gap-0.5 flex-1 py-0.5"
+          >
+            <div className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+              <UserPlus className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-white/80 text-[8px]">Thêm TV</span>
+          </button>
+
+          {/* Sự kiện */}
+          <button
+            onClick={() => setIsEventsModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 flex-1 py-0.5 relative"
+          >
+            <div className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors relative">
+              <Bell className="h-4 w-4 text-white" />
+              {upcomingPopup.length > 0 && !popupDismissed && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-black text-white flex items-center justify-center">
+                  {upcomingPopup.length}
+                </span>
+              )}
+            </div>
+            <span className="text-white/80 text-[8px]">Sự kiện</span>
+          </button>
 
         </div>
       </div>
