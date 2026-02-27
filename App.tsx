@@ -209,6 +209,52 @@ export default function App() {
     return Math.floor(L / 30);
   }
 
+  // ── Quản lý tài khoản ──
+  const SUPABASE_FUNCTION_URL = 'https://byulldrwnnxuoeihlsdr.supabase.co/functions/v1/create-user';
+
+  const fetchManagedUsers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, email, display_name, created_at')
+      .order('created_at', { ascending: false });
+    if (data) setManagedUsers(data);
+  };
+
+  const handleCreateUser = async () => {
+    if (!newUserEmail || !newUserPassword) {
+      setUserCreateMsg({ type: 'error', text: 'Vui lòng nhập email và mật khẩu' });
+      return;
+    }
+    setUserCreateLoading(true);
+    setUserCreateMsg(null);
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const res = await fetch(SUPABASE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentSession?.access_token}`,
+        },
+        body: JSON.stringify({
+          email: newUserEmail,
+          password: newUserPassword,
+          displayName: newUserName || newUserEmail,
+        }),
+      });
+      const result = await res.json();
+      if (result.error) throw new Error(result.error);
+      setUserCreateMsg({ type: 'success', text: `✅ Đã tạo tài khoản cho ${newUserEmail}` });
+      setNewUserEmail('');
+      setNewUserPassword('');
+      setNewUserName('');
+      fetchManagedUsers();
+    } catch (err: any) {
+      setUserCreateMsg({ type: 'error', text: `❌ ${err.message}` });
+    } finally {
+      setUserCreateLoading(false);
+    }
+  };
+
   const lunarStr = getLunarDate(now);
   const weekDays = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
   const solarStr = `${weekDays[now.getDay()]}, ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
@@ -301,6 +347,13 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isManageUsersOpen, setIsManageUsersOpen] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserName, setNewUserName] = useState('');
+  const [userCreateLoading, setUserCreateLoading] = useState(false);
+  const [userCreateMsg, setUserCreateMsg] = useState<{type:'success'|'error', text:string} | null>(null);
+  const [managedUsers, setManagedUsers] = useState<{id:string,email:string,display_name:string,created_at:string}[]>([]);
   const treeContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -700,98 +753,89 @@ export default function App() {
     <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-16">
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
-        {/* Banner bìa — tăng chiều cao để tên + đồng hồ không đè nhau */}
-        <div className="h-36 sm:h-44 w-full relative overflow-hidden">
+        <div className="h-24 sm:h-32 w-full relative overflow-hidden">
           <img
             src={currentTree.coverImage || "https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=2000&auto=format&fit=crop"}
             alt="Cover"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
 
-          {/* Layout dọc: tên trên, đồng hồ dưới */}
-          <div className="absolute inset-0 flex flex-col">
-
-            {/* VÙNG TRÊN: Tên gia phả căn giữa */}
-            <div className="flex-1 flex items-center justify-center px-4 pt-2">
-              {isEditingCoverText ? (
-                <div className="flex items-center gap-2 bg-black/50 px-3 py-2 rounded-xl backdrop-blur-sm">
-                  <input
-                    type="text"
-                    value={tempCoverText}
-                    onChange={(e) => setTempCoverText(e.target.value)}
-                    className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-lg sm:text-2xl font-serif font-bold tracking-widest uppercase text-center w-52"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSaveCoverText();
-                      if (e.key === 'Escape') setIsEditingCoverText(false);
-                    }}
-                  />
-                  <button onClick={handleSaveCoverText} className="text-green-400"><Check className="h-4 w-4" /></button>
-                  <button onClick={() => setIsEditingCoverText(false)} className="text-red-400"><X className="h-4 w-4" /></button>
-                </div>
-              ) : (
-                <div className="group/text relative flex items-center">
-                  <h1
-                    className="text-xl sm:text-3xl font-serif font-bold text-white tracking-widest uppercase text-center leading-tight"
-                    style={{ textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}
-                  >
-                    {currentTree.coverText || currentTree.name}
-                  </h1>
-                  <button
-                    onClick={() => {
-                      setTempCoverText(currentTree.coverText || currentTree.name);
-                      setIsEditingCoverText(true);
-                    }}
-                    className="absolute -right-7 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
-                  >
-                    <Edit2 className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
+          {/* Đồng hồ + lịch trên ảnh bìa - góc trái dưới */}
+          <div className="absolute bottom-2 left-3 z-10 flex items-end gap-3">
+            {/* Giờ lớn */}
+            <div className="flex flex-col items-start">
+              <span className="text-white font-black tabular-nums leading-none drop-shadow-lg"
+                style={{ fontSize: 'clamp(22px, 4vw, 32px)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+                {timeStr}
+              </span>
             </div>
-
-            {/* VÙNG DƯỚI: Đồng hồ trái, nút đổi ảnh phải */}
-            <div className="flex items-end justify-between px-3 pb-2">
-              {/* Đồng hồ + lịch */}
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-white font-black tabular-nums text-base sm:text-xl leading-none"
-                  style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}
-                >
-                  {timeStr}
+            {/* Đường dọc ngăn cách */}
+            <div className="w-px h-8 bg-white/30 self-center"></div>
+            {/* Lịch dương + âm */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">☀️</span>
+                <span className="text-white text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  {solarStr}
                 </span>
-                <div className="w-px h-6 bg-white/30 self-center" />
-                <div className="flex flex-col gap-0">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px]">☀️</span>
-                    <span className="text-white text-[11px] font-semibold" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
-                      {solarStr}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px]">🌙</span>
-                    <span className="text-yellow-300 text-[11px] font-semibold" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
-                      Âm lịch: {lunarStr}
-                    </span>
-                  </div>
-                </div>
               </div>
-
-              {/* Nút đổi ảnh bìa */}
-              <div className="opacity-0 group-hover/cover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => coverInputRef.current?.click()}
-                  className="bg-black/50 hover:bg-black/70 text-white rounded-lg p-1.5 text-[10px] flex items-center gap-1 backdrop-blur-sm"
-                >
-                  <Edit2 className="h-2.5 w-2.5" />
-                  <span className="hidden sm:inline">Đổi ảnh</span>
-                </button>
-                <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">🌙</span>
+                <span className="text-yellow-200 text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  Âm lịch: {lunarStr}
+                </span>
               </div>
             </div>
+          </div>
 
+          <div className="absolute top-2 right-2 opacity-0 group-hover/cover:opacity-100 transition-opacity z-10">
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              className="bg-black/50 hover:bg-black/70 text-white rounded p-1.5 text-xs flex items-center gap-1 backdrop-blur-sm transition-colors cursor-pointer"
+            >
+              <Edit2 className="h-3 w-3" />
+              <span className="hidden sm:inline">Đổi ảnh bìa</span>
+            </button>
+            <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
+          </div>
+
+          <div className="absolute inset-0 flex items-center justify-center">
+            {isEditingCoverText ? (
+              <div className="flex items-center gap-2 bg-black/50 p-2 rounded backdrop-blur-sm">
+                <input
+                  type="text"
+                  value={tempCoverText}
+                  onChange={(e) => setTempCoverText(e.target.value)}
+                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-xl sm:text-3xl font-serif font-bold tracking-widest uppercase text-center w-64"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveCoverText();
+                    if (e.key === 'Escape') setIsEditingCoverText(false);
+                  }}
+                />
+                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-5 w-5" /></button>
+                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-5 w-5" /></button>
+              </div>
+            ) : (
+              <div className="group/text relative flex items-center">
+                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-widest uppercase drop-shadow-lg text-center px-4">
+                  {currentTree.coverText || currentTree.name}
+                </h1>
+                <button
+                  onClick={() => {
+                    setTempCoverText(currentTree.coverText || currentTree.name);
+                    setIsEditingCoverText(true);
+                  }}
+                  className="absolute -right-8 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -838,9 +882,17 @@ export default function App() {
             </div>
 
             {/* Admin badge */}
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${isAdmin ? 'bg-yellow-400 text-yellow-900' : 'bg-white/20 text-white'}`}>
-              {isAdmin ? '👑' : '👤'}
-            </span>
+            {isAdmin ? (
+              <button
+                onClick={() => { setIsManageUsersOpen(true); fetchManagedUsers(); }}
+                className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-300 text-yellow-900 rounded-full px-2 py-0.5 text-[9px] font-bold flex-shrink-0 transition-colors"
+                title="Quản lý tài khoản"
+              >
+                👑 Admin
+              </button>
+            ) : (
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 bg-white/20 text-white">👤</span>
+            )}
 
             {/* Logout */}
             <button
@@ -1432,6 +1484,104 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ===== MODAL QUẢN LÝ TÀI KHOẢN ===== */}
+      {isManageUsersOpen && isAdmin && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsManageUsersOpen(false)} />
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
+              <div className="bg-[#b48a28] rounded-t-2xl px-5 py-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-white font-bold text-lg">👑 Quản lý tài khoản</h2>
+                  <p className="text-white/70 text-xs mt-0.5">Tạo tài khoản cho thành viên gia đình</p>
+                </div>
+                <button onClick={() => { setIsManageUsersOpen(false); setUserCreateMsg(null); }} className="text-white/80 hover:text-white">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-5 space-y-5">
+                {/* Form tạo mới */}
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+                  <h3 className="font-bold text-sm text-amber-900">➕ Tạo tài khoản mới</h3>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 mb-1 block">Họ tên hiển thị</label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Cao Văn An"
+                      value={newUserName}
+                      onChange={e => setNewUserName(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#b48a28] focus:ring-1 focus:ring-[#b48a28]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 mb-1 block">Email đăng nhập <span className="text-red-500">*</span></label>
+                    <input
+                      type="email"
+                      placeholder="email@gmail.com"
+                      value={newUserEmail}
+                      onChange={e => setNewUserEmail(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#b48a28] focus:ring-1 focus:ring-[#b48a28]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 mb-1 block">Mật khẩu <span className="text-red-500">*</span></label>
+                    <input
+                      type="password"
+                      placeholder="Tối thiểu 6 ký tự"
+                      value={newUserPassword}
+                      onChange={e => setNewUserPassword(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#b48a28] focus:ring-1 focus:ring-[#b48a28]"
+                      onKeyDown={e => e.key === 'Enter' && handleCreateUser()}
+                    />
+                  </div>
+                  {userCreateMsg && (
+                    <div className={`text-xs font-semibold px-3 py-2 rounded-lg ${userCreateMsg.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {userCreateMsg.text}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleCreateUser}
+                    disabled={userCreateLoading}
+                    className="w-full bg-[#b48a28] hover:bg-[#9a7522] disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    {userCreateLoading ? (
+                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Đang tạo...</>
+                    ) : (
+                      <><UserPlus className="h-4 w-4" />Tạo tài khoản</>
+                    )}
+                  </button>
+                </div>
+                {/* Danh sách đã tạo */}
+                <div>
+                  <h3 className="font-bold text-sm text-gray-700 mb-2">👥 Tài khoản đã tạo ({managedUsers.length})</h3>
+                  {managedUsers.length === 0 ? (
+                    <p className="text-xs text-gray-400 text-center py-4">Chưa có tài khoản nào</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {managedUsers.map(u => (
+                        <div key={u.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
+                          <div className="w-8 h-8 bg-[#b48a28]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm">👤</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-800 truncate">{u.display_name || u.email}</p>
+                            <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
+                          </div>
+                          <span className="text-[9px] text-gray-400 flex-shrink-0">
+                            {new Date(u.created_at).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ===== END MODAL QUẢN LÝ TÀI KHOẢN ===== */}
 
       {/* Events Modal */}
       {isEventsModalOpen && (
