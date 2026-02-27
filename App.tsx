@@ -753,45 +753,16 @@ export default function App() {
     <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-16">
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
-        <div className="h-24 sm:h-32 w-full relative overflow-hidden">
+        <div className="w-full relative overflow-hidden" style={{ height: 110 }}>
           <img
             src={currentTree.coverImage || "https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=2000&auto=format&fit=crop"}
             alt="Cover"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/50"></div>
 
-          {/* Đồng hồ + lịch trên ảnh bìa - góc trái dưới */}
-          <div className="absolute bottom-2 left-3 z-10 flex items-end gap-3">
-            {/* Giờ lớn */}
-            <div className="flex flex-col items-start">
-              <span className="text-white font-black tabular-nums leading-none drop-shadow-lg"
-                style={{ fontSize: 'clamp(22px, 4vw, 32px)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
-                {timeStr}
-              </span>
-            </div>
-            {/* Đường dọc ngăn cách */}
-            <div className="w-px h-8 bg-white/30 self-center"></div>
-            {/* Lịch dương + âm */}
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1">
-                <span className="text-[10px]">☀️</span>
-                <span className="text-white text-[11px] font-semibold drop-shadow"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
-                  {solarStr}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[10px]">🌙</span>
-                <span className="text-yellow-200 text-[11px] font-semibold drop-shadow"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
-                  Âm lịch: {lunarStr}
-                </span>
-              </div>
-            </div>
-          </div>
-
+          {/* Nút đổi ảnh bìa */}
           <div className="absolute top-2 right-2 opacity-0 group-hover/cover:opacity-100 transition-opacity z-10">
             <button
               onClick={() => coverInputRef.current?.click()}
@@ -803,39 +774,74 @@ export default function App() {
             <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
           </div>
 
-          <div className="absolute inset-0 flex items-center justify-center">
-            {isEditingCoverText ? (
-              <div className="flex items-center gap-2 bg-black/50 p-2 rounded backdrop-blur-sm">
-                <input
-                  type="text"
-                  value={tempCoverText}
-                  onChange={(e) => setTempCoverText(e.target.value)}
-                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-xl sm:text-3xl font-serif font-bold tracking-widest uppercase text-center w-64"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSaveCoverText();
-                    if (e.key === 'Escape') setIsEditingCoverText(false);
-                  }}
-                />
-                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-5 w-5" /></button>
-                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-5 w-5" /></button>
+          {/* Toàn bộ nội dung cover: flex-col, 2 hàng riêng biệt, KHÔNG overlap */}
+          <div className="absolute inset-0 flex flex-col" style={{ padding: '6px 10px 8px 10px' }}>
+
+            {/* HÀNG 1: Tên gia phả */}
+            <div className="flex-1 flex items-center justify-center">
+              {isEditingCoverText ? (
+                <div className="flex items-center gap-2 bg-black/50 p-2 rounded backdrop-blur-sm">
+                  <input
+                    type="text"
+                    value={tempCoverText}
+                    onChange={(e) => setTempCoverText(e.target.value)}
+                    className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none font-serif font-bold tracking-widest uppercase text-center"
+                    style={{ fontSize: 'clamp(14px, 4vw, 32px)', width: 'clamp(160px, 50vw, 320px)' }}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveCoverText();
+                      if (e.key === 'Escape') setIsEditingCoverText(false);
+                    }}
+                  />
+                  <button onClick={handleSaveCoverText} className="text-green-400"><Check className="h-4 w-4" /></button>
+                  <button onClick={() => setIsEditingCoverText(false)} className="text-red-400"><X className="h-4 w-4" /></button>
+                </div>
+              ) : (
+                <div className="group/text relative flex items-center justify-center w-full">
+                  <h1
+                    className="font-serif font-bold text-white tracking-widest uppercase text-center w-full px-8"
+                    style={{ fontSize: 'clamp(15px, 4.5vw, 36px)', textShadow: '0 2px 10px rgba(0,0,0,1)', lineHeight: 1.15 }}
+                  >
+                    {currentTree.coverText || currentTree.name}
+                  </h1>
+                  <button
+                    onClick={() => { setTempCoverText(currentTree.coverText || currentTree.name); setIsEditingCoverText(true); }}
+                    className="absolute right-1 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Đường kẻ phân cách */}
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.25)', flexShrink: 0 }}></div>
+
+            {/* HÀNG 2: Đồng hồ + lịch — nằm hoàn toàn dưới tên */}
+            <div className="flex items-center gap-2 flex-shrink-0" style={{ paddingTop: 5, height: 38 }}>
+              <span
+                className="text-white font-black tabular-nums flex-shrink-0"
+                style={{ fontSize: 'clamp(20px, 5vw, 30px)', textShadow: '0 2px 8px rgba(0,0,0,1)', lineHeight: 1 }}
+              >
+                {timeStr}
+              </span>
+              <div style={{ width: 1, height: 26, background: 'rgba(255,255,255,0.35)', flexShrink: 0 }}></div>
+              <div className="flex flex-col" style={{ gap: 1 }}>
+                <div className="flex items-center gap-1">
+                  <span style={{ fontSize: 9 }}>☀️</span>
+                  <span className="text-white font-semibold" style={{ fontSize: 'clamp(8px, 2vw, 11px)', textShadow: '0 1px 4px rgba(0,0,0,1)' }}>
+                    {solarStr}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span style={{ fontSize: 9 }}>🌙</span>
+                  <span className="text-yellow-200 font-semibold" style={{ fontSize: 'clamp(8px, 2vw, 11px)', textShadow: '0 1px 4px rgba(0,0,0,1)' }}>
+                    Âm: {lunarStr}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <div className="group/text relative flex items-center">
-                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-widest uppercase drop-shadow-lg text-center px-4">
-                  {currentTree.coverText || currentTree.name}
-                </h1>
-                <button
-                  onClick={() => {
-                    setTempCoverText(currentTree.coverText || currentTree.name);
-                    setIsEditingCoverText(true);
-                  }}
-                  className="absolute -right-8 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+            </div>
+
           </div>
         </div>
 
