@@ -1488,66 +1488,45 @@ export default function App() {
       )}
 
       {/* ===== FOOTER CỐ ĐỊNH ===== */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] shadow-[0_-4px_24px_rgba(0,0,0,0.3)]">
-        {/* Nút Thêm TV nổi lên giữa — tách khỏi flow */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-7 z-50 flex flex-col items-center">
-          <button
-            onClick={() => handleOpenForm()}
-            className="active:scale-95 transition-transform"
-          >
-            <div className="w-[60px] h-[60px] bg-white rounded-full shadow-2xl flex items-center justify-center"
-              style={{ border: '3px solid #c9a040' }}>
-              <UserPlus className="h-6 w-6 text-[#b48a28]" />
-            </div>
-          </button>
-          <span className="text-white font-bold text-[10px] mt-1 drop-shadow">Thêm TV</span>
-        </div>
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] shadow-[0_-4px_24px_rgba(0,0,0,0.25)]">
+        <div className="flex items-center gap-2 px-3 py-3 pb-5">
 
-        {/* 4 nút còn lại — chia đều 2 bên */}
-        <div className="flex items-center pb-4 pt-2 px-4">
-          {/* TRÁI */}
-          <div className="flex items-center gap-4 flex-1 justify-start">
-            {/* Gia phả dropdown */}
-            <div className="flex flex-col items-center gap-1">
-              <div className="h-11 bg-white/15 rounded-full flex items-center justify-center border border-white/30 px-3 min-w-[76px]">
-                <select
-                  value={currentTreeId}
-                  onChange={(e) => setCurrentTreeId(e.target.value)}
-                  className="bg-transparent text-white text-[10px] font-bold border-none outline-none cursor-pointer text-center appearance-none w-full truncate"
-                >
-                  {familyTrees.map(tree => (
-                    <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
-                  ))}
-                </select>
-              </div>
-              <span className="text-white/70 text-[9px] font-medium">Gia Phả</span>
+          {/* TRÁI: Ô chọn gia phả — pill lớn */}
+          <div className="flex-1">
+            <div className="h-14 bg-white/15 border border-white/30 rounded-full flex items-center justify-center px-3">
+              <select
+                value={currentTreeId}
+                onChange={(e) => setCurrentTreeId(e.target.value)}
+                className="bg-transparent text-white text-[11px] font-bold border-none outline-none cursor-pointer text-center appearance-none w-full truncate"
+              >
+                {familyTrees.map(tree => (
+                  <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
+                ))}
+              </select>
             </div>
-
-            {/* Tạo mới */}
-            <button onClick={() => setIsNewTreeModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
-              <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center">
-                <Plus className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-white/70 text-[9px] font-medium">Tạo mới</span>
-            </button>
           </div>
 
-          {/* GIỮA: khoảng trống cho nút nổi */}
-          <div className="w-16 flex-shrink-0" />
+          {/* GIỮA: 3 nút tròn */}
+          <div className="flex items-end gap-2">
+            {/* Tạo mới */}
+            <button onClick={() => setIsNewTreeModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Plus className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-white/80 text-[9px] font-semibold">Tạo mới</span>
+            </button>
 
-          {/* PHẢI */}
-          <div className="flex items-center gap-4 flex-1 justify-end">
             {/* Xóa */}
             <button onClick={() => setTreeToDelete(currentTreeId)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
-              <div className="w-11 h-11 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-md">
                 <Trash2 className="h-5 w-5 text-white" />
               </div>
-              <span className="text-white/70 text-[9px] font-medium">Xóa</span>
+              <span className="text-white/80 text-[9px] font-semibold">Xóa</span>
             </button>
 
             {/* Sự kiện */}
             <button onClick={() => setIsEventsModalOpen(true)} className="flex flex-col items-center gap-1 active:scale-95 transition-transform relative">
-              <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center relative">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center relative">
                 <Bell className="h-5 w-5 text-white" />
                 {upcomingPopup.length > 0 && !popupDismissed && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow">
@@ -1555,9 +1534,21 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <span className="text-white/70 text-[9px] font-medium">Sự Kiện</span>
+              <span className="text-white/80 text-[9px] font-semibold">Sự Kiện</span>
             </button>
           </div>
+
+          {/* PHẢI: Nút Thêm thành viên — pill lớn */}
+          <div className="flex-1">
+            <button
+              onClick={() => handleOpenForm()}
+              className="w-full h-14 bg-white/15 border border-white/30 rounded-full flex items-center justify-center gap-2 active:bg-white/25 transition-colors"
+            >
+              <UserPlus className="h-5 w-5 text-white flex-shrink-0" />
+              <span className="text-white font-bold text-[11px] uppercase tracking-wide">Thêm Thành Viên</span>
+            </button>
+          </div>
+
         </div>
       </div>
       {/* ===== END FOOTER ===== */}
