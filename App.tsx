@@ -749,7 +749,7 @@ export default function App() {
   );
 
   return (
-    <div className="flex flex-col font-sans bg-gray-100 overflow-hidden pb-16 sm:pb-0" style={{ height: '100dvh', maxHeight: '100dvh' }}>
+    <div className="flex flex-col font-sans bg-gray-100 overflow-hidden" style={{ height: '100dvh', width: '100%', maxHeight: '100dvh', position: 'fixed', top: 0, left: 0 }}>
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
         <div className="h-28 sm:h-36 w-full relative overflow-hidden">
