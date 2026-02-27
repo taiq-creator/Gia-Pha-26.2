@@ -682,40 +682,79 @@ export default function App() {
   );
 
   return (
-    <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden">
+    <div className="h-screen flex flex-col font-sans bg-gray-100 overflow-hidden pb-16">
       {/* Cover Section & Header */}
       <div className="flex-shrink-0 relative group/cover">
-        <div className="h-28 sm:h-36 w-full relative overflow-hidden">
+        <div className="h-24 sm:h-32 w-full relative overflow-hidden">
           <img
             src={currentTree.coverImage || "https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=2000&auto=format&fit=crop"}
             alt="Cover"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/45"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
 
-          {/* Tên bìa - căn giữa phía trên */}
-          <div className="absolute top-0 left-0 right-0 flex items-start justify-center pt-3 px-16">
+          {/* Đồng hồ + lịch trên ảnh bìa - góc trái dưới */}
+          <div className="absolute bottom-2 left-3 z-10 flex items-end gap-3">
+            {/* Giờ lớn */}
+            <div className="flex flex-col items-start">
+              <span className="text-white font-black tabular-nums leading-none drop-shadow-lg"
+                style={{ fontSize: 'clamp(22px, 4vw, 32px)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+                {timeStr}
+              </span>
+            </div>
+            {/* Đường dọc ngăn cách */}
+            <div className="w-px h-8 bg-white/30 self-center"></div>
+            {/* Lịch dương + âm */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">☀️</span>
+                <span className="text-white text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  {solarStr}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px]">🌙</span>
+                <span className="text-yellow-200 text-[11px] font-semibold drop-shadow"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                  Âm lịch: {lunarStr}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute top-2 right-2 opacity-0 group-hover/cover:opacity-100 transition-opacity z-10">
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              className="bg-black/50 hover:bg-black/70 text-white rounded p-1.5 text-xs flex items-center gap-1 backdrop-blur-sm transition-colors cursor-pointer"
+            >
+              <Edit2 className="h-3 w-3" />
+              <span className="hidden sm:inline">Đổi ảnh bìa</span>
+            </button>
+            <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
+          </div>
+
+          <div className="absolute inset-0 flex items-center justify-center">
             {isEditingCoverText ? (
               <div className="flex items-center gap-2 bg-black/50 p-2 rounded backdrop-blur-sm">
                 <input
                   type="text"
                   value={tempCoverText}
                   onChange={(e) => setTempCoverText(e.target.value)}
-                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-lg sm:text-2xl font-serif font-bold tracking-widest uppercase text-center w-56"
+                  className="bg-transparent text-white border-b border-white/50 focus:border-white outline-none text-xl sm:text-3xl font-serif font-bold tracking-widest uppercase text-center w-64"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSaveCoverText();
                     if (e.key === 'Escape') setIsEditingCoverText(false);
                   }}
                 />
-                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-4 w-4" /></button>
-                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-4 w-4" /></button>
+                <button onClick={handleSaveCoverText} className="text-green-400 hover:text-green-300"><Check className="h-5 w-5" /></button>
+                <button onClick={() => setIsEditingCoverText(false)} className="text-red-400 hover:text-red-300"><X className="h-5 w-5" /></button>
               </div>
             ) : (
               <div className="group/text relative flex items-center">
-                <h1 className="text-xl sm:text-3xl font-serif font-bold text-white tracking-widest uppercase text-center"
-                  style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
+                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-widest uppercase drop-shadow-lg text-center px-4">
                   {currentTree.coverText || currentTree.name}
                 </h1>
                 <button
@@ -723,151 +762,70 @@ export default function App() {
                     setTempCoverText(currentTree.coverText || currentTree.name);
                     setIsEditingCoverText(true);
                   }}
-                  className="absolute -right-7 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
+                  className="absolute -right-8 opacity-0 group-hover/text:opacity-100 text-white/70 hover:text-white transition-opacity p-1"
                 >
-                  <Edit2 className="h-3.5 w-3.5" />
+                  <Edit2 className="h-4 w-4" />
                 </button>
               </div>
             )}
           </div>
-
-          {/* Đồng hồ + lịch + nút đổi ảnh - hàng dưới cùng */}
-          <div className="absolute bottom-0 left-0 right-0 px-3 pb-1.5 flex items-end justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-white font-black tabular-nums text-base leading-none"
-                style={{ textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
-                {timeStr}
-              </span>
-              <div className="w-px h-5 bg-white/30 self-center"></div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-0.5">
-                  <span className="text-[9px]">☀️</span>
-                  <span className="text-white text-[10px] font-semibold leading-tight"
-                    style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
-                    {solarStr}
-                  </span>
-                </div>
-                <div className="flex items-center gap-0.5">
-                  <span className="text-[9px]">🌙</span>
-                  <span className="text-yellow-200 text-[10px] font-semibold leading-tight"
-                    style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
-                    Âm lịch: {lunarStr}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="opacity-0 group-hover/cover:opacity-100 transition-opacity">
-              <button
-                onClick={() => coverInputRef.current?.click()}
-                className="bg-black/50 hover:bg-black/70 text-white rounded p-1 text-[10px] flex items-center gap-1 backdrop-blur-sm transition-colors cursor-pointer"
-              >
-                <Edit2 className="h-3 w-3" />
-                <span className="hidden sm:inline">Đổi ảnh bìa</span>
-              </button>
-              <input type="file" ref={coverInputRef} onChange={handleCoverUpload} accept="image/*" className="hidden" />
-            </div>
-          </div>
         </div>
 
-        {/* Navigation Bar */}
+        {/* Navigation Bar - chỉ view toggle + search + logout */}
         <header className="bg-[#b48a28] text-white shadow-md">
-          <div className="px-2 py-1.5 sm:py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-0">
-            <div className="flex items-center justify-between sm:justify-start gap-3">
-              <div className="flex items-center gap-2">
-                <select
-                  value={currentTreeId}
-                  onChange={(e) => setCurrentTreeId(e.target.value)}
-                  className="bg-transparent text-sm sm:text-base font-bold tracking-tight uppercase border-none outline-none cursor-pointer hover:bg-white/10 rounded px-1 py-0.5 appearance-none"
-                >
-                  {familyTrees.map(tree => (
-                    <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setIsNewTreeModalOpen(true)}
-                  className="bg-white/20 hover:bg-white/30 text-white rounded p-1 flex items-center justify-center transition-colors"
-                  title="Tạo gia phả mới"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-                {familyTrees.length > 1 && (
-                  <button
-                    onClick={() => setTreeToDelete(currentTreeId)}
-                    className="bg-red-500/20 hover:bg-red-500/40 text-white rounded p-1 flex items-center justify-center transition-colors"
-                    title="Xóa gia phả hiện tại"
-                  >
-                    <Trash2 className="h-3 w-3 text-red-100" />
-                  </button>
-                )}
-              </div>
+          <div className="px-2 py-1.5 flex items-center gap-2">
+            {/* View toggle */}
+            <div className="flex items-center bg-white/10 rounded p-0.5 gap-0.5">
               <button
-                onClick={() => handleOpenForm()}
-                className="bg-white/20 hover:bg-white/30 text-white rounded px-2 py-1 text-[10px] sm:text-xs font-medium flex items-center gap-1 transition-colors"
+                onClick={() => setViewMode('list')}
+                className={`px-2 py-1 rounded text-[10px] font-medium flex items-center gap-1 transition-colors ${viewMode === 'list' ? 'bg-white text-[#b48a28]' : 'text-white hover:bg-white/20'}`}
               >
-                <UserPlus className="h-3 w-3" />
-                Thêm thành viên
+                <List className="h-3 w-3" /> Danh sách
               </button>
               <button
-                onClick={() => setIsEventsModalOpen(true)}
-                className="bg-white/20 hover:bg-white/30 text-white rounded px-2 py-1 text-[10px] sm:text-xs font-medium flex items-center gap-1 transition-colors relative"
+                onClick={() => setViewMode('tree')}
+                className={`px-2 py-1 rounded text-[10px] font-medium flex items-center gap-1 transition-colors ${viewMode === 'tree' ? 'bg-white text-[#b48a28]' : 'text-white hover:bg-white/20'}`}
               >
-                <Bell className="h-3 w-3" />
-                <span className="hidden sm:inline">Sự kiện</span>
+                <Network className="h-3 w-3" /> Sơ đồ
               </button>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto mt-1.5 sm:mt-0">
-              <div className="flex items-center bg-white/10 rounded p-0.5 gap-0.5">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-2 py-1 rounded text-[10px] sm:text-xs font-medium flex items-center gap-1 transition-colors ${viewMode === 'list' ? 'bg-white text-[#b48a28]' : 'text-white hover:bg-white/20'}`}
-                >
-                  <List className="h-3 w-3" /> Danh sách
-                </button>
-                <button
-                  onClick={() => setViewMode('tree')}
-                  className={`px-2 py-1 rounded text-[10px] sm:text-xs font-medium flex items-center gap-1 transition-colors ${viewMode === 'tree' ? 'bg-white text-[#b48a28]' : 'text-white hover:bg-white/20'}`}
-                >
-                  <Network className="h-3 w-3" /> Sơ đồ
-                </button>
-              </div>
-
-              {viewMode === 'tree' && (
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloading}
-                  className="bg-white/20 hover:bg-white/30 text-white rounded px-2 py-1 text-[10px] sm:text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
-                >
-                  <Download className="h-3 w-3" />
-                  {isDownloading ? 'Đang xuất...' : 'PDF'}
-                </button>
-              )}
-
-              <div className="relative flex-1 sm:flex-none">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/50" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-40 pl-6 pr-2 py-1 bg-white/10 rounded text-[10px] sm:text-xs text-white placeholder-white/50 outline-none border border-white/20 focus:border-white/50"
-                />
-              </div>
-
+            {viewMode === 'tree' && (
               <button
-                onClick={handleLogout}
-                title="Đăng xuất"
-                className="bg-white/10 hover:bg-red-500/40 text-white rounded p-1.5 flex items-center justify-center transition-colors ml-1"
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className="bg-white/20 hover:bg-white/30 text-white rounded px-2 py-1 text-[10px] font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <Download className="h-3 w-3" />
+                {isDownloading ? 'Đang xuất...' : 'PDF'}
               </button>
+            )}
 
-              <div className="hidden sm:flex items-center gap-1.5 ml-1 pl-2 border-l border-white/20">
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isAdmin ? 'bg-yellow-400 text-yellow-900' : 'bg-white/20 text-white'}`}>
-                  {isAdmin ? '👑 Admin' : '👤 Khách'}
-                </span>
-              </div>
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/50" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-6 pr-2 py-1 bg-white/10 rounded text-[10px] text-white placeholder-white/50 outline-none border border-white/20 focus:border-white/50"
+              />
             </div>
+
+            {/* Admin badge */}
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${isAdmin ? 'bg-yellow-400 text-yellow-900' : 'bg-white/20 text-white'}`}>
+              {isAdmin ? '👑' : '👤'}
+            </span>
+
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              title="Đăng xuất"
+              className="bg-white/10 hover:bg-red-500/40 text-white rounded p-1.5 flex items-center justify-center transition-colors flex-shrink-0"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
           </div>
         </header>
       </div>
@@ -1521,6 +1479,80 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ===== FOOTER CỐ ĐỊNH ===== */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#b48a28] border-t border-white/20 shadow-lg">
+        <div className="flex items-center justify-around px-2 py-1.5">
+
+          {/* Chọn gia phả */}
+          <div className="flex flex-col items-center gap-0.5 flex-1">
+            <select
+              value={currentTreeId}
+              onChange={(e) => setCurrentTreeId(e.target.value)}
+              className="bg-transparent text-white text-[10px] font-bold border-none outline-none cursor-pointer text-center appearance-none max-w-[80px] truncate"
+            >
+              {familyTrees.map(tree => (
+                <option key={tree.id} value={tree.id} className="text-black">{tree.name}</option>
+              ))}
+            </select>
+            <span className="text-white/60 text-[8px]">Gia phả</span>
+          </div>
+
+          {/* Tạo gia phả mới */}
+          <button
+            onClick={() => setIsNewTreeModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 flex-1 py-0.5"
+          >
+            <div className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+              <Plus className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-white/80 text-[8px]">Tạo mới</span>
+          </button>
+
+          {/* Xóa gia phả */}
+          {familyTrees.length > 1 && (
+            <button
+              onClick={() => setTreeToDelete(currentTreeId)}
+              className="flex flex-col items-center gap-0.5 flex-1 py-0.5"
+            >
+              <div className="w-7 h-7 bg-red-500/30 hover:bg-red-500/50 rounded-full flex items-center justify-center transition-colors">
+                <Trash2 className="h-4 w-4 text-red-200" />
+              </div>
+              <span className="text-white/80 text-[8px]">Xóa</span>
+            </button>
+          )}
+
+          {/* Thêm thành viên */}
+          <button
+            onClick={() => handleOpenForm()}
+            className="flex flex-col items-center gap-0.5 flex-1 py-0.5"
+          >
+            <div className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+              <UserPlus className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-white/80 text-[8px]">Thêm TV</span>
+          </button>
+
+          {/* Sự kiện */}
+          <button
+            onClick={() => setIsEventsModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 flex-1 py-0.5 relative"
+          >
+            <div className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors relative">
+              <Bell className="h-4 w-4 text-white" />
+              {upcomingPopup.length > 0 && !popupDismissed && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-black text-white flex items-center justify-center">
+                  {upcomingPopup.length}
+                </span>
+              )}
+            </div>
+            <span className="text-white/80 text-[8px]">Sự kiện</span>
+          </button>
+
+        </div>
+      </div>
+      {/* ===== END FOOTER ===== */}
+
     </div>
   );
 }
