@@ -228,23 +228,11 @@ export default function App() {
     setUserCreateLoading(true);
     setUserCreateMsg(null);
     try {
-      // Dùng token trực tiếp từ session state hiện tại
-      let token = session?.access_token;
-
-      // Nếu không có hoặc có thể hết hạn, refresh lại
-      if (!token) {
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError || !refreshData.session) {
-          throw new Error('Phiên đăng nhập hết hạn, vui lòng đăng xuất và đăng nhập lại');
-        }
-        token = refreshData.session.access_token;
-      }
-
       const res = await fetch(SUPABASE_FUNCTION_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'x-admin-key': 'giapha2026',
         },
         body: JSON.stringify({
           email: newUserEmail,
