@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brown-50: #fdf8f6;
+  --color-brown-100: #f2e8e5;
+  --color-brown-200: #eaddd7;
+  --color-brown-300: #e0cec7;
+  --color-brown-400: #d2bab0;
+  --color-brown-500: #a18072;
+  --color-brown-600: #8a6859;
+  --color-brown-700: #694c40;
+  --color-brown-800: #543d33;
+  --color-brown-900: #423028;
+}
+
+body {
+  background-color: var(--color-brown-50);
+  color: var(--color-brown-900);
+}
+
+/* ============================================ */
+/*  FAMILY TREE — đường kết nối chuẩn           */
+/* ============================================ */
+
+.family-tree-new {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.family-tree-new li {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* ── Wrapper nhóm các con ── */
+.tree-children {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  padding-top: 30px;
+  gap: 8px;
+}
+
+/* Đường dọc từ cha xuống (đi đến đường ngang) */
+.tree-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 30px;
+  background: #3b82f6;
+}
+
+/* ── Mỗi node con ── */
+.tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding-top: 22px;
+}
+
+/* Đường dọc từ đường ngang xuống card con */
+.tree-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 22px;
+  background: #3b82f6;
+}
+
+/* Đường ngang — vẽ trên từng node, nối với nhau thành 1 đường liên tục */
+/* Mặc định: kéo full width (node ở giữa) */
+.tree-node:not(.only-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
+}
+
+/* Con đầu tiên: chỉ nửa phải */
+.tree-node.first-child:not(.only-child)::after {
+  left: 50%;
+  right: 0;
+}
+
+/* Con cuối cùng: chỉ nửa trái */
+.tree-node.last-child:not(.only-child)::after {
+  left: 0;
+  right: 50%;
+}
+
+/* Con duy nhất: không cần đường ngang, đường dọc thẳng từ cha */
+.tree-node.only-child {
+  padding-top: 0;
+}
+.tree-node.only-child::before {
+  display: none;
+}
+.tree-node.only-child::after {
+  display: none;
+}

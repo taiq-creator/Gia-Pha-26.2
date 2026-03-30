@@ -1,0 +1,76 @@
+export const initialMembers = [
+  {
+    id: '1',
+    generation: 1,
+    fullName: 'Nguyễn Văn A',
+    gender: 'male',
+    birthDate: '1920-01-01',
+    deathDate: '2000-01-01',
+    biography: 'Người sáng lập dòng họ, di cư từ miền Trung vào miền Nam lập nghiệp.',
+    imageUrl: 'https://picsum.photos/seed/nguyen-van-a/200/200',
+    graveLocation: 'Nghĩa trang Lái Thiêu, Bình Dương',
+    relationships: 'Thủy tổ',
+  },
+  {
+    id: '2',
+    generation: 1,
+    fullName: 'Trần Thị B',
+    gender: 'female',
+    birthDate: '1925-05-10',
+    deathDate: '2005-12-20',
+    biography: 'Vợ ông Nguyễn Văn A, người phụ nữ tần tảo nuôi 5 người con.',
+    imageUrl: 'https://picsum.photos/seed/tran-thi-b/200/200',
+    graveLocation: 'Nghĩa trang Lái Thiêu, Bình Dương',
+    relationships: 'Vợ ông Nguyễn Văn A',
+    relationshipType: 'Vợ của',
+    relatedMemberId: '1'
+  },
+  {
+    id: '3',
+    generation: 2,
+    fullName: 'Nguyễn Văn C',
+    gender: 'male',
+    birthDate: '1945-02-15',
+    biography: 'Con trai trưởng, hiện đang là trưởng tộc.',
+    imageUrl: 'https://picsum.photos/seed/nguyen-van-c/200/200',
+    relationships: 'Con trai trưởng ông Nguyễn Văn A',
+    relationshipType: 'Con trai của',
+    relatedMemberId: '1'
+  },
+  {
+    id: '4',
+    generation: 2,
+    fullName: 'Nguyễn Thị D',
+    gender: 'female',
+    birthDate: '1948-08-22',
+    biography: 'Con gái thứ hai, hiện đang sống tại Mỹ.',
+    imageUrl: 'https://picsum.photos/seed/nguyen-thi-d/200/200',
+    relationships: 'Con gái ông Nguyễn Văn A',
+    relationshipType: 'Con gái của',
+    relatedMemberId: '1'
+  },
+  {
+    id: '5',
+    generation: 3,
+    fullName: 'Nguyễn Văn E',
+    gender: 'male',
+    birthDate: '1970-11-05',
+    biography: 'Cháu đích tôn, kỹ sư phần mềm.',
+    imageUrl: 'https://picsum.photos/seed/nguyen-van-e/200/200',
+    relationships: 'Con trai ông Nguyễn Văn C',
+    relationshipType: 'Con trai của',
+    relatedMemberId: '3'
+  },
+  {
+    id: '6',
+    generation: 3,
+    fullName: 'Nguyễn Thị F',
+    gender: 'female',
+    birthDate: '1975-03-12',
+    biography: 'Giáo viên trung học.',
+    imageUrl: 'https://picsum.photos/seed/nguyen-thi-f/200/200',
+    relationships: 'Con gái ông Nguyễn Văn C',
+    relationshipType: 'Con gái của',
+    relatedMemberId: '3'
+  }
+];
