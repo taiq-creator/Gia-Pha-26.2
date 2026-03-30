@@ -5,7 +5,7 @@ import { initialMembers } from './data';
 // html2canvas and jsPDF are loaded lazily in handleDownloadPDF
 // jsPDF is loaded lazily in handleDownloadPDF
 import { supabase } from './supabaseClient';
-import { Lunar } from 'lunar-calendar';
+import LunarCalendar from 'lunar-calendar/lib/LunarCalendar';
 import AuthPage from './AuthPage';
 import EventsModal, { checkUpcomingEvents, FamilyEvent } from './EventsModal';
 
@@ -145,10 +145,12 @@ export default function App() {
 
   // Lịch âm: sử dụng thư viện lunar-calendar
 const getLunarDate = (date: Date): string => {
-  const lunar = Lunar.fromSolar(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  const lunar = LunarCalendar.solarToLunar(date.getFullYear(), date.getMonth() + 1, date.getDate());
   const LUNAR_MONTH_NAMES = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
-  const monthName = LUNAR_MONTH_NAMES[lunar.month - 1];
-  return `${lunar.day} tháng ${monthName}`;
+  // lunar.lunarMonth có giá trị 1‑13 (có tháng nhuận). Nếu >12 là tháng nhuận, hiển thị tháng thực.
+  const monthIndex = lunar.lunarMonth > 12 ? lunar.lunarMonth - 12 : lunar.lunarMonth;
+  const monthName = LUNAR_MONTH_NAMES[monthIndex - 1];
+  return `${lunar.lunarDay} tháng ${monthName}`;
 };
 // ── Quản lý tài khoản ──
   const SUPABASE_FUNCTION_URL = 'https://byulldrwnnxuoeihlsdr.supabase.co/functions/v1/create-user';
