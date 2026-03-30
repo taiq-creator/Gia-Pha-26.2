@@ -2,8 +2,8 @@ import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { Search, Plus, User, Trash2, Edit2, MapPin, BookOpen, Users, X, Calendar, Upload, ChevronDown, ChevronRight, List, Network, ZoomIn, ZoomOut, Maximize, ChevronUp, UserPlus, Download, Check, LogOut, Bell, PartyPopper } from 'lucide-react';
 import { Member, FamilyTree } from './types';
 import { initialMembers } from './data';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// html2canvas and jsPDF are loaded lazily in handleDownloadPDF
+// jsPDF is loaded lazily in handleDownloadPDF
 import { supabase } from './supabaseClient';
 import AuthPage from './AuthPage';
 import EventsModal, { checkUpcomingEvents, FamilyEvent } from './EventsModal';
@@ -225,7 +225,17 @@ export default function App() {
       setUserCreateMsg({ type: 'error', text: 'Vui lòng nhập email và mật khẩu' });
       return;
     }
-    setUserCreateLoading(true);
+    // Simple validation
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(newUserEmail)) {
+  setUserCreateMsg({ type: 'error', text: '❌ Email không hợp lệ' });
+  return;
+}
+if (newUserPassword.length < 6) {
+  setUserCreateMsg({ type: 'error', text: '❌ Mật khẩu ít nhất 6 ký tự' });
+  return;
+}
+setUserCreateLoading(true);
     setUserCreateMsg(null);
     try {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -565,6 +575,11 @@ export default function App() {
   const handleDownloadPDF = async () => {
     try {
       setIsDownloading(true);
+    // Lazy load heavy libraries
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf')
+    ]);
 
       // Tạo div ẩn bên ngoài viewport để render toàn bộ sơ đồ
       const printDiv = document.createElement('div');
