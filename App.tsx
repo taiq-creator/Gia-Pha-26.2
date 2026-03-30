@@ -265,7 +265,11 @@ setUserCreateLoading(true);
     }
   };
 
-  const lunarStr = getLunarDate(now);
+  const [lunarStr, setLunarStr] = useState(getLunarDate(now));
+  // Cập nhật lịch âm mỗi khi thời gian thay đổi (mỗi giây)
+  useEffect(() => {
+    setLunarStr(getLunarDate(now));
+  }, [now]);
   const weekDays = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
   const solarStr = `${weekDays[now.getDay()]}, ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
   const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
