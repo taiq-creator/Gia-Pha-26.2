@@ -143,13 +143,31 @@ export default function App() {
 
 
 
-  // Lịch âm: sử dụng thư viện lunar-calendar
+  // Lịch âm: sử dụng thư viện lunar-calendar (với điều chỉnh múi giờ +7)
 const getLunarDate = (date: Date): string => {
-  const lunar = LunarCalendar.solarToLunar(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  const LUNAR_MONTH_NAMES = ['Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám','Chín','Mười','Một','Chạp'];
+  // ---- ĐIỀU CHỈNH MÚI GIỜ ----
+  // `date` là thời gian local của trình duyệt. Để tính lịch âm đúng theo Việt Nam (UTC+7),
+  // chúng ta chuyển nó sang giờ UTC+7 trước khi truyền vào lunar‑calendar.
+  const vietnamOffsetMinutes = 7 * 60;            // +7 giờ = 420 phút
+  const localOffsetMinutes   = date.getTimezoneOffset(); // phút (UTC – local)
+  const diffMinutes = vietnamOffsetMinutes + localOffsetMinutes;
+  const vietDate = new Date(date.getTime() + diffMinutes * 60 * 1000);
+  // --------------------------------
+
+  const lunar = LunarCalendar.solarToLunar(
+    vietDate.getFullYear(),
+    vietDate.getMonth() + 1,
+    vietDate.getDate()
+  );
+
+  const LUNAR_MONTH_NAMES = [
+    'Giêng','Hai','Ba','Tư','Năm','Sáu','Bảy','Tám',
+    'Chín','Mười','Một','Chạp'
+  ];
   // lunar.lunarMonth có giá trị 1‑13 (có tháng nhuận). Nếu >12 là tháng nhuận, hiển thị tháng thực.
   const monthIndex = lunar.lunarMonth > 12 ? lunar.lunarMonth - 12 : lunar.lunarMonth;
-  const monthName = LUNAR_MONTH_NAMES[monthIndex - 1];
+  const monthName  = LUNAR_MONTH_NAMES[monthIndex - 1];
+
   return `${lunar.lunarDay} tháng ${monthName}`;
 };
 // ── Quản lý tài khoản ──
